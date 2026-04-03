@@ -330,9 +330,10 @@ function setView(v) { currentView = v; selectedBet = null; expandedPhase = null;
 function render() {
   // Tabs
   const tabsEl = document.getElementById('tabs');
-  tabsEl.innerHTML = ['overview','bets','plugins','activity'].map(v =>
-    `<button class="tab ${currentView===v?'active':''}" onclick="setView('${v}')">${v.charAt(0).toUpperCase()+v.slice(1)}</button>`
-  ).join('');
+  tabsEl.innerHTML = ['overview','bets','plugins','activity','docs'].map(v => {
+    const label = v === 'docs' ? 'Docs' : v.charAt(0).toUpperCase()+v.slice(1);
+    return `<button class="tab ${currentView===v?'active':''}" onclick="setView('${v}')">${label}</button>`;
+  }).join('');
 
   document.getElementById('footer-updated').textContent = 'Last updated: ' + new Date().toLocaleDateString('en-CH', { year:'numeric', month:'long', day:'numeric' });
 
@@ -341,6 +342,7 @@ function render() {
   else if (currentView === 'bets') renderBets(content);
   else if (currentView === 'plugins') renderPlugins(content);
   else if (currentView === 'activity') renderActivity(content);
+  else if (currentView === 'docs') renderDocs(content);
 }
 
 function renderOverview(el) {
@@ -569,6 +571,112 @@ function renderActivity(el) {
     </div>`;
   });
   html += '</div></div>';
+
+  el.innerHTML = html;
+}
+
+function renderDocs(el) {
+  let html = '';
+
+  // --- What is this ---
+  html += `<div class="card" style="margin-bottom:20px">
+    <div class="card-title">What is FlowSpex Mission Control?</div>
+    <p style="font-size:14px;line-height:1.7;color:var(--muted);max-width:800px">
+      FlowSpex is a <strong style="color:var(--text)">mission control engine for export compliance</strong> — managing the full lifecycle from first customer inquiry to final documentation archive.
+      It orchestrates the 37+ steps, 12+ documents, 6+ authorities, and 8–14 weeks that a typical deep-tech export mission requires.
+    </p>
+    <p style="font-size:14px;line-height:1.7;color:var(--muted);max-width:800px;margin-top:12px">
+      This dashboard tracks the <strong style="color:var(--text)">Shape Up master plan</strong> — 5 time-boxed bets that build FlowSpex from foundation to full product. Each bet has scopes tracked on hill charts (left = figuring it out, right = executing).
+    </p>
+  </div>`;
+
+  // --- 6 Phases explained ---
+  html += `<div class="card" style="margin-bottom:20px">
+    <div class="card-title">The 6-Phase Lifecycle</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px">
+      ${[
+        { p: 'P0', name: 'Intake & Triage', desc: 'Customer inquiry arrives. Situation assessment, product decomposition, initial risk flag. Creates the Mission JSON.' },
+        { p: 'P1', name: 'Assess & Classify', desc: 'Export control classification (EKN), destination risk, consignee vetting, EUC generation, timeline backward chain.' },
+        { p: 'P2', name: 'License & Document', desc: 'SECO license application (if needed), CI, packing list, COO, EUR.1 — all cross-checked against Mission JSON.' },
+        { p: 'P3', name: 'Pack & Ship', desc: 'DG classification, packing, labeling, carrier coordination, crate labels, insurance, freight booking.' },
+        { p: 'P4', name: 'Operate In-Country', desc: 'Import clearance, in-country operations support, temporary import tracking, customer site coordination.' },
+        { p: 'P5', name: 'Return & Re-import', desc: 'Carnet return, re-import documentation, equipment reconciliation, customs discharge.' },
+        { p: 'P6', name: 'Close & Report', desc: 'Mission archive, lessons learned, case database entry, compliance report, audit trail.' },
+      ].map(ph => `<div style="background:var(--bg);border-radius:8px;padding:14px">
+        <div style="font-weight:800;color:var(--blue);font-size:13px;margin-bottom:4px">${ph.p} — ${ph.name}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">${ph.desc}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  // --- Shape Up glossary ---
+  html += `<div class="grid-2" style="margin-bottom:20px">
+    <div class="card">
+      <div class="card-title">Shape Up Glossary</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--muted)">
+        <div><strong style="color:var(--text)">Bet</strong> — A time-boxed work package with fixed appetite (weeks). If it can't ship in the appetite, it gets re-scoped, not extended.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Scope</strong> — A slice of work within a bet. Each scope is independently shippable and tracked on the hill chart.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Hill Chart</strong> — Left side = "figuring it out" (unknowns remain). Right side = "executing" (known work, just doing it). A dot at 50% means you've crested the hill — no more unknowns.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Appetite</strong> — How much time we're willing to spend, not an estimate of how long it takes. Hard ceiling.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Milestone</strong> — Revenue unlock point. Milestones are reached when specific bets complete and the system can handle real paid work.</div>
+        <div style="margin-top:8px"><strong style="color:var(--orange)">Tim's Input Needed</strong> — Bet is gated on Tim documenting operational logic (routing rules, carrier selection, authority workflows) in the Tim Input Worksheet.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How to Use This Dashboard</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--muted)">
+        <div><strong style="color:var(--text)">Select your actor</strong> — Click Pavel or Tim in the top-right. All changes are logged under your name.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Move hill chart dots</strong> — Go to Bets tab, select a bet, drag the slider for any scope. Left = still figuring out, right = executing.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Mark scopes done</strong> — Click the "Done" button next to a scope. This sets it to 100% and marks it green.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Update bet/milestone status</strong> — Use the dropdown selectors to change status (Not Started → In Progress → Done).</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Check phase coverage</strong> — Overview tab shows which phases have plugin coverage and which have gaps.</div>
+        <div style="margin-top:8px"><strong style="color:var(--text)">Review activity</strong> — Activity tab shows all recent changes with who made them and when.</div>
+      </div>
+    </div>
+  </div>`;
+
+  // --- Key Documents ---
+  html += `<div class="card" style="margin-bottom:20px">
+    <div class="card-title">Key Documents</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+      ${[
+        { title: 'Master Plan', desc: 'Shape Up plan with all 5 bets, scopes, milestones, revenue unlock points, and dependencies.', file: 'flowspex-master-plan.md', icon: '📋' },
+        { title: 'Tim Input Worksheet', desc: '9-section structured worksheet for Tim to document operational knowledge — routing rules, carrier logic, authority workflows.', file: 'flowspex-tim-input-worksheet.md', icon: '📝' },
+        { title: 'JTBD Research', desc: 'Jobs-to-be-done findings: two customer segments (expert vs scared), four forces analysis, redesign prompts.', file: 'flowspex-jtbd-analysis.md', icon: '🔬' },
+        { title: 'Competitive Landscape', desc: 'Market analysis: no competitor covers the full workflow. Five white spaces identified. EU AI Act moat.', file: 'flowspex-competitive-landscape.md', icon: '🗺️' },
+        { title: 'Pitch Deck', desc: 'FlowSpex investor/partner pitch deck — mission control positioning, market sizing, revenue model.', file: 'flowspex-pitch-deck.pptx', icon: '📊' },
+        { title: 'Pricing Model', desc: 'Pilot pricing: €2,900 one-time + €290/mo for 6 months (first 2–3 clients).', file: 'pricing-model.md', icon: '💰' },
+      ].map(doc => `<div style="background:var(--bg);border-radius:8px;padding:14px;display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:24px">${doc.icon}</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text)">${doc.title}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">${doc.desc}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:6px;font-family:monospace">${doc.file}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <p style="font-size:12px;color:var(--dim);margin-top:16px">Documents are in Google Drive → 04_Work projects → 00_Vectis → 01_FlowSpex</p>
+  </div>`;
+
+  // --- Revenue Roadmap ---
+  html += `<div class="card">
+    <div class="card-title">Revenue Roadmap</div>
+    <div style="display:flex;gap:0;align-items:stretch">
+      ${[
+        { ms: 'M1', label: 'Foundation', rev: '—', color: 'var(--dim)', bets: '1, 2' },
+        { ms: 'M2', label: 'First Paid', rev: '€500–2k/assessment', color: 'var(--yellow)', bets: '1, 2, 3' },
+        { ms: 'M3', label: 'Full Docs', rev: '€3–15k/mission', color: 'var(--green)', bets: '4' },
+        { ms: 'M4', label: 'Full Lifecycle', rev: '€1.5–5k/mo retainer', color: 'var(--green)', bets: '5' },
+        { ms: 'M5', label: 'Product', rev: 'Scalable SaaS', color: 'var(--blue)', bets: 'all' },
+      ].map((m, i) => `<div style="flex:1;text-align:center;padding:16px 8px;position:relative;${i < 4 ? 'border-right:1px solid var(--border);' : ''}">
+        <div style="font-weight:800;font-size:16px;color:${m.color}">${m.ms}</div>
+        <div style="font-size:12px;font-weight:700;margin-top:4px">${m.label}</div>
+        <div style="font-size:11px;color:${m.color};margin-top:6px;font-weight:600">${m.rev}</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:6px">Bets ${m.bets}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
 
   el.innerHTML = html;
 }
