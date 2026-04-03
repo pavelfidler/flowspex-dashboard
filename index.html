@@ -213,6 +213,13 @@
   .missions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
   .mission-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
   .mission-card h4 { font-size: 14px; margin-bottom: 6px; }
+  .mission-next-action { margin-top: 8px; padding: 8px 10px; background: #1e1b4b; border: 1px solid #4338ca; border-radius: 8px; font-size: 12px; color: #c7d2fe; font-style: italic; }
+  .mission-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .input { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 12px; }
+  .input:focus { outline: none; border-color: var(--blue); }
+  .btn { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 12px; cursor: pointer; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: white; }
+  .btn:hover { opacity: 0.9; }
   .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
   .skeleton { background: linear-gradient(90deg, #1f2937 25%, #334155 40%, #1f2937 60%); background-size: 300% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; }
   .skeleton.row { height: 14px; margin: 8px 0; }
@@ -223,6 +230,16 @@
   .mytasks-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .mytasks-table th, .mytasks-table td { padding: 8px 6px; border-bottom: 1px solid #1e293b; text-align: left; }
   .mytasks-table th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .badge.new-changes { background: #7c3aed44; color: #ddd6fe; margin-left: 8px; }
+  .status-inline { display: inline-flex; align-items: center; gap: 6px; }
+  .sync-badge { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 11px; border: 1px solid var(--border); }
+  .sync-badge .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .sync-badge.realtime { color: #86efac; border-color: #166534; background: #14532d66; }
+  .sync-badge.realtime .dot { background: #22c55e; }
+  .sync-badge.polling { color: #fde68a; border-color: #92400e; background: #78350f66; }
+  .sync-badge.polling .dot { background: #eab308; }
+  .sync-badge.connecting { color: #bfdbfe; border-color: #1e40af; background: #1e3a8a66; }
+  .sync-badge.connecting .dot { background: #60a5fa; }
 
   @keyframes shimmer {
     0% { background-position: 100% 0; }
@@ -301,6 +318,8 @@ if (sessionStorage.getItem('fs-mc-auth') === '1') {
         <span>Acting as:</span>
         <button class="actor-btn active" data-actor="Pavel" onclick="setActor('Pavel')">Pavel</button>
         <button class="actor-btn" data-actor="Tim" onclick="setActor('Tim')">Tim</button>
+        <span id="sync-badge" class="sync-badge connecting"><span class="dot"></span><span>Sync: connecting</span></span>
+        <span id="last-change-badge" class="hint" style="margin-left:8px"></span>
       </div>
     </div>
   </div>
@@ -314,6 +333,8 @@ if (sessionStorage.getItem('fs-mc-auth') === '1') {
 <script>
 const SUPABASE_URL = 'https://wxxihhojcwctfrniglxy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4eGloaG9qY3djdGZybmlnbHh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzI4OTAsImV4cCI6MjA5MDE0ODg5MH0.0zOAB6xdl5h0B000tO7iIjQU1ghpoPeeVGYdWDGGQG4';
+const DASHBOARD_WRITE_URL = `${SUPABASE_URL}/functions/v1/dashboard-write`;
+const WRITE_ACTIONS_ENABLED = true;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -349,7 +370,7 @@ const TABS = [
   { id: 'metrics', label: 'Metrics' },
 ];
 const CACHE_KEY = 'flowspex-dashboard-cache-v3';
-const WRITES_ENABLED = false; // anon key is read-only under RLS
+const STATUS_CYCLE = { todo: 'in_progress', in_progress: 'done', done: 'blocked', blocked: 'todo' };
 
 let state = {
   bets: [],
@@ -367,6 +388,9 @@ let loading = true;
 let loadingError = '';
 let hydratedFromCache = false;
 let helpOpen = false;
+let realtimeChannel = null;
+let fallbackPollId = null;
+let syncMode = 'connecting';
 
 function getTabFromUrl() {
   const tab = new URL(window.location.href).searchParams.get('tab');
@@ -378,6 +402,30 @@ let selectedBet = null;
 let expandedPhase = null;
 let expandedScopes = new Set();
 let currentActor = 'Pavel';
+
+function humanAgo(ts) {
+  const diff = Math.max(0, Date.now() - new Date(ts).getTime());
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function setSyncMode(mode) {
+  syncMode = mode;
+  const badge = document.getElementById('sync-badge');
+  if (!badge) return;
+  badge.classList.remove('realtime', 'polling', 'connecting');
+  badge.classList.add(mode);
+  const textEl = badge.querySelector('span:last-child');
+  if (textEl) {
+    const label = mode === 'realtime' ? 'Sync: realtime' : mode === 'polling' ? 'Sync: polling fallback' : 'Sync: connecting';
+    textEl.textContent = label;
+  }
+}
 
 function persistCache() {
   try {
@@ -509,13 +557,35 @@ function showIndicator(text, kind) {
   setTimeout(() => el.className = 'save-indicator hidden', 1500);
 }
 
-function showReadOnlyNotice() {
-  showIndicator('Read-only mode', 'saving');
+function showError(text) {
+  showIndicator(text || 'Action failed', 'saving');
 }
 
-async function logActivity(action, targetType, targetId, details) {
-  if (!WRITES_ENABLED) return showReadOnlyNotice();
-  await sb.from('flowspex_activity').insert({ actor: currentActor, action, target_type: targetType, target_id: String(targetId), details });
+async function callDashboardWrite(action, targetId, data) {
+  if (!WRITE_ACTIONS_ENABLED) {
+    showError('Writes disabled');
+    return null;
+  }
+  try {
+    const resp = await fetch(DASHBOARD_WRITE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        actor: currentActor,
+        action,
+        target_id: targetId,
+        data,
+      }),
+    });
+    const payload = await resp.json().catch(() => ({}));
+    if (!resp.ok || payload.error) throw new Error(payload.error || 'Write failed');
+    showIndicator('Saved', 'saved');
+    await loadAll();
+    return payload.row || null;
+  } catch (err) {
+    showError(err.message || 'Write failed');
+    return null;
+  }
 }
 
 function setActor(actor) {
@@ -537,6 +607,62 @@ function setView(viewId, skipPush) {
 function toggleHelp() {
   helpOpen = !helpOpen;
   renderHelpModal();
+}
+
+async function cycleTaskStatus(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const next = STATUS_CYCLE[task.status] || 'todo';
+  await callDashboardWrite('update_task', taskId, {
+    status: next,
+    scope_id: task.scope_id,
+  });
+}
+
+async function updateTaskNotes(taskId, notes) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  await callDashboardWrite('update_task', taskId, {
+    notes,
+    scope_id: task.scope_id,
+  });
+}
+
+async function updateScopeHill(scopeId, newHill) {
+  const scope = state.scopes.find(s => s.id === scopeId);
+  if (!scope) return;
+  await callDashboardWrite('update_scope', scopeId, {
+    hill_position: Number(newHill),
+    status: scope.status,
+  });
+}
+
+async function updateMissionStatus(missionId, status) {
+  await callDashboardWrite('update_mission', missionId, { status });
+}
+
+async function updateMissionNextAction(missionId, nextAction) {
+  await callDashboardWrite('update_mission', missionId, { next_action: nextAction });
+}
+
+async function createMissionFromForm() {
+  const client = document.getElementById('mission-new-client')?.value?.trim() || '';
+  const type = document.getElementById('mission-new-type')?.value?.trim() || '';
+  const owner = document.getElementById('mission-new-owner')?.value || currentActor;
+  const deadline = document.getElementById('mission-new-deadline')?.value || null;
+  const revenueEstimate = Number(document.getElementById('mission-new-revenue')?.value || 0);
+  const nextAction = document.getElementById('mission-new-next-action')?.value?.trim() || null;
+
+  if (!client) return showError('Client name required');
+  await callDashboardWrite('create_mission', null, {
+    client_name: client,
+    mission_type: type || null,
+    owner,
+    deadline,
+    revenue_estimate: revenueEstimate || null,
+    status: 'intake',
+    next_action: nextAction,
+  });
 }
 
 function hillSVG(scopes, compact) {
@@ -585,6 +711,8 @@ function render() {
   const loadedText = loaded ? loaded.toLocaleDateString('en-CH', { year:'numeric', month:'long', day:'numeric' }) : '—';
   const staleBadge = hydratedFromCache ? ' <span class="pill stale">showing cached data</span>' : '';
   document.getElementById('footer-updated').innerHTML = `Last updated: ${loadedText}${staleBadge}`;
+  renderLastChangeBadge();
+  setSyncMode(syncMode);
 
   const content = document.getElementById('content');
   if (loading && !state.bets.length && !state.missions.length) {
@@ -601,16 +729,26 @@ function render() {
   renderHelpModal();
 }
 
+function renderLastChangeBadge() {
+  const el = document.getElementById('last-change-badge');
+  if (!el) return;
+  const latest = [...state.activity].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
+  if (!latest) {
+    el.textContent = '';
+    return;
+  }
+  const actor = latest.actor || 'Unknown';
+  const ago = humanAgo(latest.created_at);
+  const isOtherActor = actor !== currentActor;
+  el.innerHTML = `Last change: ${ago} by ${actor}${isOtherActor ? ' <span class="badge new-changes">New changes</span>' : ''}`;
+}
+
 function renderMissions(el) {
   const missions = state.missions.filter(missionVisibleForActor);
   const pipeline = ['intake', 'in_progress', 'review', 'delivered', 'closed'];
   const counts = Object.fromEntries(pipeline.map(s => [s, missions.filter(m => m.status === s).length]));
 
   let html = '';
-  if (!WRITES_ENABLED) {
-    html += '<div class="readonly-banner">Mission editing is disabled in this dashboard (anon read-only mode). Use Cowork sessions for create/update operations.</div>';
-  }
-
   html += '<div class="card" style="margin-bottom:12px">';
   html += '<div class="card-title">Status Pipeline</div>';
   html += `<div class="pipeline">${pipeline.map(s => `<span class="pipeline-step">${s.replace('_',' ')}: <strong>${counts[s] || 0}</strong></span>`).join('')}</div>`;
@@ -619,8 +757,19 @@ function renderMissions(el) {
 
   html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
   html += '<div class="card-title" style="margin:0">Client Missions</div>';
-  html += '<button class="tab" onclick="showReadOnlyNotice()">Add Mission</button>';
+  html += '<button class="btn primary" onclick="createMissionFromForm()">Add Mission</button>';
   html += '</div>';
+  html += `<div class="card" style="margin-bottom:12px">
+    <div class="card-title">Create Mission</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px">
+      <input id="mission-new-client" class="input" placeholder="Client name">
+      <input id="mission-new-type" class="input" placeholder="Mission type">
+      <select id="mission-new-owner" class="input"><option value="Pavel">Pavel</option><option value="Tim">Tim</option><option value="Both">Both</option></select>
+      <input id="mission-new-deadline" class="input" type="date">
+      <input id="mission-new-revenue" class="input" type="number" placeholder="Revenue estimate">
+      <input id="mission-new-next-action" class="input" placeholder="Next action">
+    </div>
+  </div>`;
 
   if (!missions.length) {
     html += '<div class="empty-state">No active missions yet. First paid engagement is the goal.</div>';
@@ -635,9 +784,10 @@ function renderMissions(el) {
     html += `<div class="mission-card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
         <h4>${m.client_name || 'Unnamed Client'}</h4>
-        <span class="badge ${m.status || 'not_started'}">${STATUS_LABELS[m.status] || m.status || 'Unknown'}</span>
+        <span class="status-inline"><span class="badge ${m.status || 'not_started'}">${STATUS_LABELS[m.status] || m.status || 'Unknown'}</span></span>
       </div>
       <div class="hint">${m.mission_type || 'Mission'}${m.destination ? ` • ${m.destination}` : ''}</div>
+      <div class="mission-next-action"><strong>Next action:</strong> ${m.next_action || 'Define the next concrete step'}</div>
       ${m.description ? `<div style="font-size:12px;color:var(--muted);margin:8px 0">${m.description}</div>` : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-top:8px">
         <div><span class="hint">Deadline:</span> ${deadline}</div>
@@ -645,8 +795,11 @@ function renderMissions(el) {
         <div><span class="hint">Est. Revenue:</span> ${revEstimate}</div>
         <div><span class="hint">Actual:</span> ${m.revenue_actual ? `€${Number(m.revenue_actual).toLocaleString('en-CH')}` : '—'}</div>
       </div>
-      <div style="margin-top:10px">
-        <button class="tab" onclick="showReadOnlyNotice()">Edit</button>
+      <div class="mission-controls">
+        <select class="input" onchange="updateMissionStatus(${m.id}, this.value)">
+          ${['intake','in_progress','review','delivered','closed'].map(s => `<option value="${s}" ${m.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <input class="input" value="${(m.next_action || '').replace(/"/g, '&quot;')}" placeholder="Next action" onblur="updateMissionNextAction(${m.id}, this.value)">
       </div>
     </div>`;
   });
@@ -671,9 +824,7 @@ function renderDevelopment(el) {
   });
 
   let html = '';
-  if (!WRITES_ENABLED) {
-    html += '<div class="readonly-banner">Development data is shown read-only. Writes are disabled to respect current anon RLS permissions.</div>';
-  }
+  html += '<div class="hint" style="margin-bottom:8px">All updates are persisted via Edge Function `dashboard-write`.</div>';
 
   if (isTimMode()) {
     const myTasks = [...visibleTasks].sort((a, b) => {
@@ -738,8 +889,27 @@ function renderDevelopment(el) {
             <span class="scope-name">${s.name}</span>${auditedBadge}
             <div class="hint">${doneTasks}/${totalTasks} tasks done</div>
           </div>
+          <input type="range" class="scope-slider" min="0" max="100" value="${s.hill_position || 0}" onchange="updateScopeHill(${s.id}, this.value)">
           <span class="scope-hill-label ${s.status === 'done' ? 'done' : Number(s.hill_position) >= 50 ? 'downhill' : 'uphill'}">${s.hill_position || 0}%</span>
         </div>`;
+        if (scopeTasks.length) {
+          html += '<div class="task-list">';
+          scopeTasks.forEach(t => {
+            const icon = t.status === 'done' ? '&#10003;' : t.status === 'in_progress' ? '&#9654;' : t.status === 'blocked' ? '!' : '';
+            html += `<div class="task-item">
+              <div class="task-checkbox ${t.status || 'todo'}" onclick="cycleTaskStatus(${t.id})" title="todo → in_progress → done → blocked → todo">${icon}</div>
+              <div class="task-body">
+                <div class="task-name ${t.status==='done'?'done':''}">${t.name}</div>
+                <div class="task-meta">
+                  ${t.owner ? `<span class="task-owner ${t.owner}">${t.owner}</span>` : ''}
+                  <span class="badge ${t.status || 'todo'}">${STATUS_LABELS[t.status] || t.status || 'todo'}</span>
+                </div>
+                <textarea class="task-notes-input" rows="1" onblur="updateTaskNotes(${t.id}, this.value)">${t.notes || ''}</textarea>
+              </div>
+            </div>`;
+          });
+          html += '</div>';
+        }
       });
       html += '</div>';
     }
@@ -874,10 +1044,24 @@ function renderActivity(el) {
   } else {
     unified.forEach(a => {
       const time = new Date(a.created_at).toLocaleString('en-CH', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      let text = `${a.action} on ${a.target_type} #${a.target_id}${a.details?.mission ? ` • ${a.details.mission}` : ''}`;
+      const details = a.details || {};
+      if (details.from_status && details.to_status) {
+        let name = '';
+        if (a.target_type === 'task') {
+          const task = state.tasks.find(t => String(t.id) === String(a.target_id));
+          name = task ? ` "${task.name}"` : '';
+        }
+        text = `${a.target_type}${name} → <span class="badge ${details.from_status}">${details.from_status}</span> → <span class="badge ${details.to_status}">${details.to_status}</span>`;
+      } else if (details.from_hill !== undefined && details.to_hill !== undefined) {
+        const scope = state.scopes.find(s => String(s.id) === String(a.target_id));
+        const scopeName = scope ? ` "${scope.name}"` : '';
+        text = `scope${scopeName} hill ${details.from_hill} → ${details.to_hill}`;
+      }
       html += `<div class="activity-item">
         <span class="activity-time">${time}</span>
         <span class="activity-actor">${a.actor}</span>
-        <span class="activity-text">${a.action} on ${a.target_type} #${a.target_id}${a.details?.mission ? ` • ${a.details.mission}` : ''}</span>
+        <span class="activity-text">${text}</span>
       </div>`;
     });
   }
@@ -957,7 +1141,12 @@ function renderMetrics(el) {
   else withTrend.forEach(r => {
     const color = r.trend >= 0 ? 'var(--green)' : 'var(--red)';
     const sign = r.trend >= 0 ? '+' : '';
-    html += `<div class="scope-row"><div style="flex:1">Bet ${r.bet.id}: ${r.bet.name}</div><div style="color:${color};font-weight:700">${sign}${r.trend.toFixed(1)} pts</div></div>`;
+    const stagnantCount = state.hillSnapshots.filter(s => {
+      const scope = state.scopes.find(sc => Number(sc.id) === Number(s.scope_id));
+      return scope && Number(scope.bet_id) === Number(r.bet.id);
+    }).length;
+    const stuck = stagnantCount > 5 && Math.abs(r.trend) < 0.01;
+    html += `<div class="scope-row"><div style="flex:1">Bet ${r.bet.id}: ${r.bet.name}${stuck ? ' <span class="badge paused">potentially stuck</span>' : ''}</div><div style="color:${stuck ? 'var(--yellow)' : color};font-weight:700">${sign}${r.trend.toFixed(1)} pts</div></div>`;
   });
   html += '</div>';
 
@@ -988,16 +1177,51 @@ function renderHelpModal() {
       <p><strong>Plugin Coverage</strong> indicates theoretical capability only (not production readiness).</p>
       <p>When acting as Tim, the dashboard filters to Tim + Both ownership and defaults to Development with a My Tasks table.</p>
       <p>Use tab URLs like <code>?tab=missions</code>, <code>?tab=dev</code>, <code>?tab=activity</code>, <code>?tab=metrics</code> for deep links.</p>
-      <p>Writes are currently disabled in this UI due to read-only anon access; use Cowork sessions for updates.</p>
+      <p>Writes go through the Supabase Edge Function <code>dashboard-write</code>.</p>
     </div>
   </div>`;
   document.body.appendChild(modal);
 }
 
+let refreshQueued = false;
+function queueRefresh() {
+  if (refreshQueued) return;
+  refreshQueued = true;
+  setTimeout(async () => {
+    refreshQueued = false;
+    await loadAll();
+  }, 500);
+}
+
+function startRealtime() {
+  if (realtimeChannel) return;
+  setSyncMode('connecting');
+  realtimeChannel = sb.channel('dashboard-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'flowspex_tasks' }, queueRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'flowspex_scopes' }, queueRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'flowspex_missions' }, queueRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'flowspex_activity' }, queueRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'flowspex_hill_snapshots' }, queueRefresh)
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        if (fallbackPollId) {
+          clearInterval(fallbackPollId);
+          fallbackPollId = null;
+        }
+        setSyncMode('realtime');
+        return;
+      }
+      if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') && !fallbackPollId) {
+        fallbackPollId = setInterval(loadAll, 45000);
+        setSyncMode('polling');
+      }
+    });
+}
+
 hydrateFromCache();
 render();
 loadAll();
-setInterval(loadAll, 45000);
+startRealtime();
 </script>
 </div><!-- /app-wrapper -->
 </body>
