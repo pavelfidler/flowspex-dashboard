@@ -812,22 +812,31 @@ function renderDocs(el) {
     <div class="card-title">Key Documents</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
       ${[
-        { title: 'Master Plan', desc: 'Shape Up plan with all 5 bets, scopes, milestones, revenue unlock points, and dependencies.', file: 'flowspex-master-plan.md', icon: '📋' },
-        { title: 'Tim Input Worksheet', desc: '9-section structured worksheet for Tim to document operational knowledge — routing rules, carrier logic, authority workflows.', file: 'flowspex-tim-input-worksheet.md', icon: '📝' },
-        { title: 'JTBD Research', desc: 'Jobs-to-be-done findings: two customer segments (expert vs scared), four forces analysis, redesign prompts.', file: 'flowspex-jtbd-analysis.md', icon: '🔬' },
-        { title: 'Competitive Landscape', desc: 'Market analysis: no competitor covers the full workflow. Five white spaces identified. EU AI Act moat.', file: 'flowspex-competitive-landscape.md', icon: '🗺️' },
-        { title: 'Pitch Deck', desc: 'FlowSpex investor/partner pitch deck — mission control positioning, market sizing, revenue model.', file: 'flowspex-pitch-deck.pptx', icon: '📊' },
-        { title: 'Pricing Model', desc: 'Pilot pricing: €2,900 one-time + €290/mo for 6 months (first 2–3 clients).', file: 'pricing-model.md', icon: '💰' },
-      ].map(doc => `<div style="background:var(--bg);border-radius:8px;padding:14px;display:flex;gap:12px;align-items:flex-start">
+        { title: 'Agent Functional Spec v3.1', desc: 'How the agent enables customer progress — 3 modes (Rescue, Diagnosis, Evaluation), intake paths, response templates. Latest Re-Wired Group review.', icon: '🤖', url: 'https://docs.google.com/document/d/1RfnE6O7K1CFHrbxb7zNNpVu24qVjz94YYJInkYhr0dk/edit', status: 'live' },
+        { title: 'JTBD Research', desc: 'Jobs-to-be-done findings: two customer segments (expert vs scared), four forces analysis, redesign prompts.', icon: '🔬', url: 'https://docs.google.com/document/d/1focVcF244GT_E_z2El4BZW0Wo_ppOqsN_m4sZGEu1ok/edit', status: 'live' },
+        { title: 'Mission Intake Questionnaires', desc: 'Structured intake forms for Demo, Sales, and Service missions. Collects all info before committing to timeline/price.', icon: '📋', url: 'https://docs.google.com/document/d/1bcaQwYeJiZoWmFq_qzd_FIuJPJRi1lTxdzsezE_1wl4/edit', status: 'live' },
+        { title: 'Mission Log Template', desc: 'Captures decision points, friction signals, and near-failures in real time to build battle-tested playbooks.', icon: '📝', url: 'https://docs.google.com/document/d/1c_s5DRyOWANNFn5A8WcJ_MfojUvVIq2v17jNZpisXZo/edit', status: 'live' },
+        { title: 'Competitive Landscape', desc: 'Market analysis: no competitor covers the full workflow. Five white spaces identified. EU AI Act moat.', icon: '🗺️', url: null, status: 'todo' },
+        { title: 'Master Plan (Shape Up)', desc: 'Shape Up plan with all 5 bets, scopes, milestones, revenue unlock points, and dependencies.', icon: '📊', url: null, status: 'todo' },
+        { title: 'Pitch Deck', desc: 'FlowSpex investor/partner pitch deck — mission control positioning, market sizing, revenue model.', icon: '🎯', url: null, status: 'todo' },
+        { title: 'Pricing Model', desc: 'Pilot pricing: EUR 2,900 one-time + EUR 290/mo for 6 months (first 2-3 clients).', icon: '💰', url: null, status: 'todo' },
+      ].map(doc => `<a href="${doc.url || '#'}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:var(--bg);border-radius:8px;padding:14px;display:flex;gap:12px;align-items:flex-start;cursor:${doc.url ? 'pointer' : 'default'};border:1px solid ${doc.url ? 'transparent' : 'var(--border)'};transition:border-color 0.2s,box-shadow 0.2s"
+        ${doc.url ? 'onmouseover="this.style.borderColor=\'var(--blue)\';this.style.boxShadow=\'0 2px 8px rgba(59,130,246,0.15)\'" onmouseout="this.style.borderColor=\'transparent\';this.style.boxShadow=\'none\'"' : ''}>
         <span style="font-size:24px">${doc.icon}</span>
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text)">${doc.title}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px">
+            ${doc.title}
+            <span style="font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;${doc.status === 'live' ? 'background:rgba(34,197,94,0.15);color:var(--green)' : 'background:rgba(234,179,8,0.15);color:var(--yellow)'}">${doc.status === 'live' ? 'On Drive' : 'To Create'}</span>
+          </div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">${doc.desc}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:6px;font-family:monospace">${doc.file}</div>
+          ${doc.url ? '<div style="font-size:11px;color:var(--blue);margin-top:6px">Click to open in Google Drive ↗</div>' : '<div style="font-size:11px;color:var(--dim);margin-top:6px">Not yet created</div>'}
         </div>
-      </div>`).join('')}
+      </a>`).join('')}
     </div>
-    <p style="font-size:12px;color:var(--dim);margin-top:16px">Documents are in Google Drive → 04_Work projects → 00_Vectis → 01_FlowSpex</p>
+    <p style="font-size:12px;color:var(--dim);margin-top:16px">
+      Documents folder: <a href="https://drive.google.com/drive/folders/1_Kcc2KWkq8aKBqzob52utSap26exC_mh" target="_blank" rel="noopener" style="color:var(--blue)">Google Drive → 01_FlowSpex ↗</a>
+      &nbsp;|&nbsp; Shared with Tim: <a href="https://drive.google.com/drive/folders/1lJGNWlU-z6-RBPFB3R2GGCO1vWxmh_aM" target="_blank" rel="noopener" style="color:var(--blue)">FLOWSPEX_SHARED_TIM ↗</a>
+    </p>
   </div>`;
 
   // --- Revenue Roadmap ---
