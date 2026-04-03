@@ -200,36 +200,34 @@
   .actor-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
   .actor-btn { padding: 4px 12px; border-radius: 6px; border: 2px solid var(--border); background: transparent; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; }
   .actor-btn.active { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+  .help-btn { margin-left: 8px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600; }
+  .help-btn:hover { border-color: var(--blue); color: var(--blue); }
 
-  /* Timeline tab */
-  .timeline-section { margin-bottom: 24px; }
-  .timeline-section-title { font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .hint { font-size: 12px; color: var(--muted); }
+  .empty-state { background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; padding: 20px; color: var(--muted); }
+  .readonly-banner { margin-bottom: 12px; background: #1e1b4b; border: 1px solid #4338ca; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #c7d2fe; }
+  .pill { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .pill.stale { background: #451a03; color: #fbbf24; }
+  .pipeline { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .pipeline-step { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--muted); }
+  .missions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .mission-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .mission-card h4 { font-size: 14px; margin-bottom: 6px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .skeleton { background: linear-gradient(90deg, #1f2937 25%, #334155 40%, #1f2937 60%); background-size: 300% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; }
+  .skeleton.row { height: 14px; margin: 8px 0; }
+  .decision-item { background: var(--bg); border-left: 3px solid var(--yellow); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; }
+  .tooltip { cursor: help; color: var(--blue); border-bottom: 1px dotted var(--blue); }
+  .modal-backdrop { position: fixed; inset: 0; background: #020617cc; display: flex; align-items: center; justify-content: center; z-index: 80; }
+  .modal { width: min(760px, 92vw); max-height: 80vh; overflow: auto; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+  .mytasks-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .mytasks-table th, .mytasks-table td { padding: 8px 6px; border-bottom: 1px solid #1e293b; text-align: left; }
+  .mytasks-table th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
 
-  .bet-timeline { margin-bottom: 16px; }
-  .bet-timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .bet-timeline-name { font-size: 13px; font-weight: 700; color: var(--text); }
-  .bet-timeline-dates { font-size: 11px; color: var(--dim); }
-  .bet-timeline-bar-bg { height: 28px; background: var(--bg); border-radius: 6px; position: relative; overflow: hidden; }
-  .bet-timeline-fill { height: 100%; border-radius: 6px; transition: width 0.3s; position: absolute; left: 0; top: 0; }
-  .bet-timeline-now { position: absolute; top: 0; bottom: 0; width: 2px; background: white; opacity: 0.6; z-index: 2; }
-  .bet-timeline-label { position: absolute; top: 50%; transform: translateY(-50%); left: 10px; font-size: 11px; font-weight: 700; color: white; z-index: 3; white-space: nowrap; }
-  .bet-timeline-pct { position: absolute; top: 50%; transform: translateY(-50%); right: 10px; font-size: 11px; font-weight: 600; color: var(--muted); z-index: 3; }
-  .bet-timeline-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
-
-  .velocity-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
-  .velocity-week { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
-  .velocity-bars { display: flex; gap: 2px; align-items: flex-end; height: 80px; }
-  .velocity-bar { width: 16px; border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.3s; position: relative; }
-  .velocity-bar-count { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700; white-space: nowrap; }
-  .velocity-label { font-size: 10px; color: var(--dim); white-space: nowrap; }
-
-  .sparkline-container { display: inline-flex; align-items: flex-end; gap: 3px; width: 60px; height: 20px; }
-  .sparkline-dot { width: 8px; border-radius: 2px; background: var(--blue); min-height: 2px; transition: height 0.2s; }
-
-  .hill-sparkline-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; font-size: 12px; border-radius: 6px; margin-bottom: 4px; }
-  .hill-sparkline-row:hover { background: var(--bg); }
-  .hill-sparkline-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .hill-sparkline-value { font-size: 11px; color: var(--dim); width: 36px; text-align: right; }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
 
   @media (max-width: 900px) {
     .grid-2 { grid-template-columns: 1fr; }
@@ -295,7 +293,10 @@ if (sessionStorage.getItem('fs-mc-auth') === '1') {
       <p>Master Plan Dashboard — Shape Up Bets</p>
     </div>
     <div style="text-align: right">
-      <div class="tabs" id="tabs"></div>
+      <div style="display:flex;justify-content:flex-end;align-items:center">
+        <div class="tabs" id="tabs"></div>
+        <button class="help-btn" onclick="toggleHelp()">Help</button>
+      </div>
       <div class="actor-bar" style="margin-top: 8px;">
         <span>Acting as:</span>
         <button class="actor-btn active" data-actor="Pavel" onclick="setActor('Pavel')">Pavel</button>
@@ -317,7 +318,18 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const SCOPE_COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#10b981','#ef4444','#ec4899'];
-const STATUS_LABELS = { not_started: 'Not Started', in_progress: 'In Progress', done: 'Done', paused: 'Paused' };
+const STATUS_LABELS = {
+  not_started: 'Not Started',
+  in_progress: 'In Progress',
+  done: 'Done',
+  paused: 'Paused',
+  future: 'Future',
+  upcoming: 'Upcoming',
+  blocked: 'Blocked',
+  todo: 'Todo',
+  delivered: 'Delivered',
+  closed: 'Closed',
+};
 const PLUGINS_STATIC = [
   { name: 'Export Compliance', phases: [1,2] },
   { name: 'DG Compliance', phases: [2,3] },
@@ -330,186 +342,91 @@ const PLUGINS_STATIC = [
   { name: 'Shipping Transport', phases: [2,3] },
 ];
 
-let state = { bets: [], scopes: [], phases: [], milestones: [], decisions: [], activity: [], tasks: [], hillSnapshots: [] };
-let currentView = 'overview';
+const TABS = [
+  { id: 'missions', label: 'Active Missions' },
+  { id: 'dev', label: 'Development' },
+  { id: 'activity', label: 'Activity' },
+  { id: 'metrics', label: 'Metrics' },
+];
+const CACHE_KEY = 'flowspex-dashboard-cache-v3';
+const WRITES_ENABLED = false; // anon key is read-only under RLS
+
+let state = {
+  bets: [],
+  scopes: [],
+  phases: [],
+  milestones: [],
+  decisions: [],
+  activity: [],
+  tasks: [],
+  missions: [],
+  hillSnapshots: [],
+  loadedAt: null,
+};
+let loading = true;
+let loadingError = '';
+let hydratedFromCache = false;
+let helpOpen = false;
+
+function getTabFromUrl() {
+  const tab = new URL(window.location.href).searchParams.get('tab');
+  return TABS.some(t => t.id === tab) ? tab : 'missions';
+}
+
+let currentView = getTabFromUrl();
 let selectedBet = null;
 let expandedPhase = null;
 let expandedScopes = new Set();
 let currentActor = 'Pavel';
-let refreshInFlight = false;
-const LIVE_REFRESH_VIEWS = new Set(['overview', 'bets', 'timeline']);
 
-// --- Data loading ---
-async function loadAll() {
-  const [bets, scopes, phases, milestones, decisions, activity, tasks, hillSnapshots] = await Promise.all([
-    sb.from('flowspex_bets').select('*').order('id'),
-    sb.from('flowspex_scopes').select('*').order('id'),
-    sb.from('flowspex_phases').select('*').order('id'),
-    sb.from('flowspex_milestones').select('*').order('id'),
-    sb.from('flowspex_decisions').select('*').order('id', { ascending: false }),
-    sb.from('flowspex_activity').select('*').order('created_at', { ascending: false }).limit(50),
-    sb.from('flowspex_tasks').select('*').order('priority'),
-    sb.from('flowspex_hill_snapshots').select('*').order('snapshot_date'),
-  ]);
-  state.bets = bets.data || [];
-  state.scopes = scopes.data || [];
-  state.phases = phases.data || [];
-  state.milestones = milestones.data || [];
-  state.decisions = decisions.data || [];
-  state.activity = activity.data || [];
-  state.tasks = tasks.data || [];
-  state.hillSnapshots = hillSnapshots.data || [];
-  render();
-}
-
-async function refreshLiveData() {
-  if (refreshInFlight) return;
-  refreshInFlight = true;
+function persistCache() {
   try {
-    const [bets, scopes, milestones, tasks] = await Promise.all([
-      sb.from('flowspex_bets').select('*').order('id'),
-      sb.from('flowspex_scopes').select('*').order('id'),
-      sb.from('flowspex_milestones').select('*').order('id'),
-      sb.from('flowspex_tasks').select('*').order('priority'),
-    ]);
-    state.bets = bets.data || state.bets;
-    state.scopes = scopes.data || state.scopes;
-    state.milestones = milestones.data || state.milestones;
-    state.tasks = tasks.data || state.tasks;
-    render();
-  } finally {
-    refreshInFlight = false;
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ state, savedAt: Date.now() }));
+  } catch (err) {
+    console.warn('Failed to cache dashboard state', err);
   }
 }
 
-function startAutoRefresh() {
-  setInterval(() => {
-    if (document.visibilityState === 'visible' && LIVE_REFRESH_VIEWS.has(currentView)) refreshLiveData();
-  }, 30000);
+function hydrateFromCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.state) return;
+    state = { ...state, ...parsed.state };
+    hydratedFromCache = true;
+  } catch (err) {
+    console.warn('Failed to hydrate cache', err);
+  }
 }
 
-// --- Mutations ---
-async function showSaved() {
-  const el = document.getElementById('save-indicator');
-  el.textContent = 'Saved'; el.className = 'save-indicator saved';
-  setTimeout(() => el.className = 'save-indicator hidden', 1500);
+function isTimMode() {
+  return currentActor === 'Tim';
 }
 
-async function logActivity(action, targetType, targetId, details) {
-  await sb.from('flowspex_activity').insert({ actor: currentActor, action, target_type: targetType, target_id: String(targetId), details });
+function taskVisibleForActor(task) {
+  if (!isTimMode()) return true;
+  return task.owner === 'Tim' || task.owner === 'Both';
 }
 
-async function updateScopeHill(scopeId, newHill) {
-  await sb.from('flowspex_scopes').update({ hill_position: newHill }).eq('id', scopeId);
-  const scope = state.scopes.find(s => s.id === scopeId);
-  if (scope) { scope.hill_position = newHill; render(); }
-  // Snapshot hill position for sparkline history (one per scope per day)
-  const today = new Date().toISOString().split('T')[0];
-  await sb.from('flowspex_hill_snapshots').upsert({
-    scope_id: scopeId,
-    hill_position: newHill,
-    snapshot_date: today
-  }, { onConflict: 'scope_id,snapshot_date' });
-  await logActivity('moved hill', 'scope', scopeId, { hill_position: newHill });
-  showSaved();
+function missionVisibleForActor(mission) {
+  if (!isTimMode()) return true;
+  return mission.owner === 'Tim' || mission.owner === 'Both';
 }
 
-async function updateScopeStatus(scopeId, newStatus) {
-  const updates = { status: newStatus };
-  if (newStatus === 'done') updates.hill_position = 100;
-  await sb.from('flowspex_scopes').update(updates).eq('id', scopeId);
-  const scope = state.scopes.find(s => s.id === scopeId);
-  if (scope) { Object.assign(scope, updates); render(); }
-  await logActivity('set status ' + newStatus, 'scope', scopeId, {});
-  showSaved();
+function activityVisibleForActor(item) {
+  if (!isTimMode()) return true;
+  return (item.actor || '').toLowerCase() === 'tim';
 }
 
-async function updateBetStatus(betId, newStatus) {
-  const updates = { status: newStatus };
-  if (newStatus === 'in_progress' && !state.bets.find(b=>b.id===betId)?.started_at) updates.started_at = new Date().toISOString();
-  if (newStatus === 'done') updates.completed_at = new Date().toISOString();
-  await sb.from('flowspex_bets').update(updates).eq('id', betId);
-  const bet = state.bets.find(b => b.id === betId);
-  if (bet) { Object.assign(bet, updates); render(); }
-  await logActivity('set bet status ' + newStatus, 'bet', betId, {});
-  showSaved();
+function getVisibleTasks() {
+  return state.tasks.filter(taskVisibleForActor);
 }
 
-async function updateMilestoneStatus(mId, newStatus) {
-  const updates = { status: newStatus };
-  if (newStatus === 'done') updates.completed_at = new Date().toISOString();
-  await sb.from('flowspex_milestones').update(updates).eq('id', mId);
-  const m = state.milestones.find(x => x.id === mId);
-  if (m) { Object.assign(m, updates); render(); }
-  await logActivity('set milestone status ' + newStatus, 'milestone', mId, {});
-  showSaved();
-}
-
-async function cycleTaskStatus(taskId) {
-  const task = state.tasks.find(t => t.id === taskId);
-  if (!task) return;
-  const cycle = { todo: 'in_progress', in_progress: 'done', done: 'todo', blocked: 'todo' };
-  const newStatus = cycle[task.status] || 'todo';
-  await sb.from('flowspex_tasks').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', taskId);
-  task.status = newStatus;
-  render();
-  await logActivity('task ' + newStatus, 'task', taskId, { name: task.name });
-  showSaved();
-}
-
-async function setTaskStatus(taskId, newStatus) {
-  await sb.from('flowspex_tasks').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', taskId);
-  const task = state.tasks.find(t => t.id === taskId);
-  if (task) { task.status = newStatus; render(); }
-  await logActivity('task ' + newStatus, 'task', taskId, {});
-  showSaved();
-}
-
-// Debounced notes save — updates state immediately, writes to DB after 800ms pause
-const _notesTimers = {};
-let _activeNotesTaskId = null;
-
-function onNotesInput(taskId, value) {
-  _activeNotesTaskId = taskId;
-  const task = state.tasks.find(t => t.id === taskId);
-  if (task) task.notes = value;
-  if (_notesTimers[taskId]) clearTimeout(_notesTimers[taskId]);
-  _notesTimers[taskId] = setTimeout(() => flushNotes(taskId, value), 800);
-}
-
-async function flushNotes(taskId, notes) {
-  await sb.from('flowspex_tasks').update({ notes, updated_at: new Date().toISOString() }).eq('id', taskId);
-  showSaved();
-}
-
-function onNotesBlur(taskId, value) {
-  if (_notesTimers[taskId]) { clearTimeout(_notesTimers[taskId]); _notesTimers[taskId] = null; }
-  const task = state.tasks.find(t => t.id === taskId);
-  if (task) task.notes = value;
-  flushNotes(taskId, value);
-  _activeNotesTaskId = null;
-}
-
-// Legacy wrapper for compatibility
-async function updateTaskNotes(taskId, notes) {
-  onNotesBlur(taskId, notes);
-}
-
-async function addTask(scopeId) {
-  const input = document.getElementById('new-task-' + scopeId);
-  if (!input || !input.value.trim()) return;
-  const name = input.value.trim();
-  const maxPriority = Math.max(0, ...state.tasks.filter(t => t.scope_id === scopeId).map(t => t.priority));
-  const { data } = await sb.from('flowspex_tasks').insert({ scope_id: scopeId, name, status: 'todo', owner: currentActor, priority: maxPriority + 1 }).select();
-  if (data && data[0]) { state.tasks.push(data[0]); render(); }
-  await logActivity('added task', 'scope', scopeId, { task: name });
-  showSaved();
-}
-
-function toggleScope(scopeId) {
-  if (expandedScopes.has(scopeId)) expandedScopes.delete(scopeId);
-  else expandedScopes.add(scopeId);
-  render();
+function getScopesForBet(betId) {
+  const scopes = state.scopes.filter(s => s.bet_id === betId);
+  if (!isTimMode()) return scopes;
+  return scopes.filter(scope => getVisibleTasks().some(t => t.scope_id === scope.id));
 }
 
 function deriveBetStatus(scopes) {
@@ -519,46 +436,109 @@ function deriveBetStatus(scopes) {
   return 'not_started';
 }
 
-function getBetDisplayStatus(bet, scopes) {
+function getBetStatus(bet) {
+  const scopes = state.scopes.filter(s => s.bet_id === bet.id);
   const derived = deriveBetStatus(scopes);
-  const override = bet.status_override || bet.manual_status || bet.override_status;
-  if (override) return override;
-  // Keep legacy manual status only as explicit pause override.
-  if (bet.status === 'paused') return 'paused';
-  return derived;
+  return bet.status && bet.status !== 'not_started' ? bet.status : derived;
 }
 
-function deriveMilestoneStatus(dependencyStatuses) {
-  if (!dependencyStatuses.length) return 'not_started';
-  if (dependencyStatuses.every(s => s === 'done')) return 'done';
-  if (dependencyStatuses.some(s => s === 'in_progress' || s === 'done' || s === 'paused')) return 'in_progress';
+function deriveMilestoneStatus(milestone) {
+  const deps = milestone.bet_ids || [];
+  if (!deps.length) return milestone.status || 'future';
+  const depStatuses = deps.map(id => getBetStatus(state.bets.find(b => b.id === id) || { id }));
+  if (depStatuses.every(s => s === 'done')) return 'done';
+  if (depStatuses.some(s => s === 'in_progress' || s === 'done')) return 'in_progress';
   return 'not_started';
 }
 
-function getMilestoneDisplayStatus(milestone, betStatusById) {
-  const deps = Array.isArray(milestone.bet_ids) ? milestone.bet_ids : [];
-  if (!deps.length) return milestone.status || 'not_started';
-  const depStatuses = deps
-    .map(id => betStatusById.get(id))
-    .filter(Boolean);
-  const derived = deriveMilestoneStatus(depStatuses);
-  const override = milestone.status_override || milestone.manual_status || milestone.override_status;
-  return override || derived;
+function updateUrlTab(tabId, replace) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('tab', tabId);
+  if (replace) history.replaceState({}, '', url.toString());
+  else history.pushState({}, '', url.toString());
 }
 
-function isScopeResetAudited(scopeId) {
-  const scopeTasks = state.tasks.filter(t => t.scope_id === scopeId);
-  if (!scopeTasks.length) return false;
-  return scopeTasks.every(t => typeof t.notes === 'string' && t.notes.trim().toUpperCase().startsWith('RESET'));
+window.addEventListener('popstate', () => {
+  currentView = getTabFromUrl();
+  render();
+});
+
+async function loadAll() {
+  loading = true;
+  loadingError = '';
+  render();
+
+  const [bets, scopes, phases, milestones, decisions, activity, tasks, missions, hillSnapshots] = await Promise.all([
+    sb.from('flowspex_bets').select('*').order('id'),
+    sb.from('flowspex_scopes').select('*').order('id'),
+    sb.from('flowspex_phases').select('*').order('id'),
+    sb.from('flowspex_milestones').select('*').order('id'),
+    sb.from('flowspex_decisions').select('*').order('id', { ascending: false }),
+    sb.from('flowspex_activity').select('*').order('created_at', { ascending: false }).limit(100),
+    sb.from('flowspex_tasks').select('*').order('priority'),
+    sb.from('flowspex_missions').select('*').order('updated_at', { ascending: false }),
+    sb.from('flowspex_hill_snapshots').select('*').order('created_at', { ascending: false }).limit(800),
+  ]);
+
+  const firstError = [bets, scopes, phases, milestones, decisions, activity, tasks, missions, hillSnapshots]
+    .map(r => r.error)
+    .find(Boolean);
+  if (firstError) loadingError = firstError.message || 'Failed loading dashboard data';
+
+  state.bets = bets.data || [];
+  state.scopes = scopes.data || [];
+  state.phases = phases.data || [];
+  state.milestones = milestones.data || [];
+  state.decisions = decisions.data || [];
+  state.activity = activity.data || [];
+  state.tasks = tasks.data || [];
+  state.missions = missions.data || [];
+  state.hillSnapshots = hillSnapshots.data || [];
+  state.loadedAt = new Date().toISOString();
+
+  persistCache();
+  hydratedFromCache = false;
+  loading = false;
+  render();
 }
 
-function getScopeColor(scope, index) {
-  if (scope.status === 'done') return '#22c55e';
-  if (isScopeResetAudited(scope.id)) return '#6b7280';
-  return SCOPE_COLORS[index % SCOPE_COLORS.length];
+function showIndicator(text, kind) {
+  const el = document.getElementById('save-indicator');
+  el.textContent = text;
+  el.className = `save-indicator ${kind || 'saved'}`;
+  setTimeout(() => el.className = 'save-indicator hidden', 1500);
 }
 
-// --- Hill chart SVG ---
+function showReadOnlyNotice() {
+  showIndicator('Read-only mode', 'saving');
+}
+
+async function logActivity(action, targetType, targetId, details) {
+  if (!WRITES_ENABLED) return showReadOnlyNotice();
+  await sb.from('flowspex_activity').insert({ actor: currentActor, action, target_type: targetType, target_id: String(targetId), details });
+}
+
+function setActor(actor) {
+  currentActor = actor;
+  document.querySelectorAll('.actor-btn').forEach(b => b.classList.toggle('active', b.dataset.actor === actor));
+  if (actor === 'Tim') setView('dev');
+  else render();
+}
+
+function setView(viewId, skipPush) {
+  if (!TABS.some(t => t.id === viewId)) return;
+  currentView = viewId;
+  selectedBet = null;
+  expandedPhase = null;
+  if (!skipPush) updateUrlTab(viewId);
+  render();
+}
+
+function toggleHelp() {
+  helpOpen = !helpOpen;
+  renderHelpModal();
+}
+
 function hillSVG(scopes, compact) {
   const w = compact ? 260 : 400, h = compact ? 70 : 100;
   function hillY(pct) {
@@ -575,65 +555,248 @@ function hillSVG(scopes, compact) {
     svg += `<text x="${w*0.75}" y="${h+11}" text-anchor="middle" fill="#6b7280" font-size="10">Executing</text>`;
   }
   scopes.forEach((s, i) => {
-    const x = (s.hill_position / 100) * w;
-    const y = hillY(s.hill_position);
-    const c = getScopeColor(s, i);
+    const x = (Number(s.hill_position || 0) / 100) * w;
+    const y = hillY(Number(s.hill_position || 0));
+    const c = s.status === 'done' ? '#22c55e' : SCOPE_COLORS[i % SCOPE_COLORS.length];
     const r = compact ? 4 : 6;
-    const auditedSuffix = isScopeResetAudited(s.id) ? ' (audited reset)' : '';
-    svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="white" stroke-width="1.5"><title>${s.name}: ${s.hill_position}%${auditedSuffix}</title></circle>`;
+    const audited = (s.__allReset === true) ? '#9ca3af' : c;
+    svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="${audited}" stroke="white" stroke-width="1.5"><title>${s.name}: ${s.hill_position || 0}%</title></circle>`;
   });
   svg += '</svg>';
   return svg;
 }
 
-// --- Rendering ---
-function setActor(a) {
-  currentActor = a;
-  document.querySelectorAll('.actor-btn').forEach(b => b.classList.toggle('active', b.dataset.actor === a));
+function markScopeAuditState(scope) {
+  const tasks = state.tasks.filter(t => t.scope_id === scope.id);
+  if (!tasks.length) return { ...scope, __allReset: false };
+  const allReset = tasks.every(t => String(t.notes || '').trim().toUpperCase().startsWith('RESET'));
+  return { ...scope, __allReset: allReset };
 }
 
-function setView(v) {
-  currentView = v;
-  selectedBet = null;
-  expandedPhase = null;
-  render();
-  if (LIVE_REFRESH_VIEWS.has(v)) refreshLiveData();
+function renderLoadingSkeleton() {
+  return `<div class="card"><div class="skeleton row"></div><div class="skeleton row"></div><div class="skeleton row"></div><div class="skeleton row"></div></div>`;
 }
 
 function render() {
-    // Preserve active notes textarea during re-render
-    let _savedNotesCursor = null;
-    if (_activeNotesTaskId) {
-      const el = document.getElementById('notes-' + _activeNotesTaskId);
-      if (el && document.activeElement === el) {
-        _savedNotesCursor = { id: _activeNotesTaskId, start: el.selectionStart, end: el.selectionEnd, value: el.value, scrollTop: el.scrollTop };
-      }
-    }
-  // Tabs
   const tabsEl = document.getElementById('tabs');
-  tabsEl.innerHTML = ['overview','timeline','bets','plugins','activity','docs'].map(v => {
-    const label = v === 'docs' ? 'Docs' : v.charAt(0).toUpperCase()+v.slice(1);
-    return `<button class="tab ${currentView===v?'active':''}" onclick="setView('${v}')">${label}</button>`;
-  }).join('');
+  tabsEl.innerHTML = TABS.map(t => `<button class="tab ${currentView===t.id?'active':''}" onclick="setView('${t.id}')">${t.label}</button>`).join('');
 
-  document.getElementById('footer-updated').textContent = 'Last updated: ' + new Date().toLocaleDateString('en-CH', { year:'numeric', month:'long', day:'numeric' });
+  const loaded = state.loadedAt ? new Date(state.loadedAt) : null;
+  const loadedText = loaded ? loaded.toLocaleDateString('en-CH', { year:'numeric', month:'long', day:'numeric' }) : '—';
+  const staleBadge = hydratedFromCache ? ' <span class="pill stale">showing cached data</span>' : '';
+  document.getElementById('footer-updated').innerHTML = `Last updated: ${loadedText}${staleBadge}`;
 
   const content = document.getElementById('content');
-  if (currentView === 'overview') renderOverview(content);
-  else if (currentView === 'timeline') renderTimeline(content);
-  else if (currentView === 'bets') renderBets(content);
-  else if (currentView === 'plugins') renderPlugins(content);
+  if (loading && !state.bets.length && !state.missions.length) {
+    content.innerHTML = renderLoadingSkeleton();
+    renderHelpModal();
+    return;
+  }
+
+  if (currentView === 'missions') renderMissions(content);
+  else if (currentView === 'dev') renderDevelopment(content);
   else if (currentView === 'activity') renderActivity(content);
-  else if (currentView === 'docs') renderDocs(content);
+  else if (currentView === 'metrics') renderMetrics(content);
+
+  renderHelpModal();
 }
 
-function renderOverview(el) {
-  let html = '<div class="grid-2">';
-  const betScopesById = new Map(state.bets.map(bet => [bet.id, state.scopes.filter(s => s.bet_id === bet.id)]));
-  const betStatusById = new Map(state.bets.map(bet => [bet.id, getBetDisplayStatus(bet, betScopesById.get(bet.id) || [])]));
+function renderMissions(el) {
+  const missions = state.missions.filter(missionVisibleForActor);
+  const pipeline = ['intake', 'in_progress', 'review', 'delivered', 'closed'];
+  const counts = Object.fromEntries(pipeline.map(s => [s, missions.filter(m => m.status === s).length]));
 
-  // Phase coverage
-  html += '<div class="card"><div class="card-title">Phase Coverage</div>';
+  let html = '';
+  if (!WRITES_ENABLED) {
+    html += '<div class="readonly-banner">Mission editing is disabled in this dashboard (anon read-only mode). Use Cowork sessions for create/update operations.</div>';
+  }
+
+  html += '<div class="card" style="margin-bottom:12px">';
+  html += '<div class="card-title">Status Pipeline</div>';
+  html += `<div class="pipeline">${pipeline.map(s => `<span class="pipeline-step">${s.replace('_',' ')}: <strong>${counts[s] || 0}</strong></span>`).join('')}</div>`;
+  html += '<div class="hint">Pipeline: intake → in_progress → review → delivered → closed</div>';
+  html += '</div>';
+
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  html += '<div class="card-title" style="margin:0">Client Missions</div>';
+  html += '<button class="tab" onclick="showReadOnlyNotice()">Add Mission</button>';
+  html += '</div>';
+
+  if (!missions.length) {
+    html += '<div class="empty-state">No active missions yet. First paid engagement is the goal.</div>';
+    el.innerHTML = html;
+    return;
+  }
+
+  html += '<div class="missions-grid">';
+  missions.forEach(m => {
+    const deadline = m.deadline ? new Date(m.deadline).toLocaleDateString('en-CH') : '—';
+    const revEstimate = m.revenue_estimate ? `€${Number(m.revenue_estimate).toLocaleString('en-CH')}` : '—';
+    html += `<div class="mission-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <h4>${m.client_name || 'Unnamed Client'}</h4>
+        <span class="badge ${m.status || 'not_started'}">${STATUS_LABELS[m.status] || m.status || 'Unknown'}</span>
+      </div>
+      <div class="hint">${m.mission_type || 'Mission'}${m.destination ? ` • ${m.destination}` : ''}</div>
+      ${m.description ? `<div style="font-size:12px;color:var(--muted);margin:8px 0">${m.description}</div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-top:8px">
+        <div><span class="hint">Deadline:</span> ${deadline}</div>
+        <div><span class="hint">Owner:</span> ${m.owner || '—'}</div>
+        <div><span class="hint">Est. Revenue:</span> ${revEstimate}</div>
+        <div><span class="hint">Actual:</span> ${m.revenue_actual ? `€${Number(m.revenue_actual).toLocaleString('en-CH')}` : '—'}</div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="tab" onclick="showReadOnlyNotice()">Edit</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+function renderDevelopment(el) {
+  const visibleTasks = getVisibleTasks();
+  const bets = [...state.bets].sort((a, b) => a.id - b.id);
+
+  const currentBet = bets.find(b => getBetStatus(b) === 'in_progress') || bets.find(b => getBetStatus(b) !== 'done') || bets[0];
+  if (!selectedBet && currentBet) selectedBet = currentBet.id;
+  const selected = bets.find(b => b.id === selectedBet) || currentBet;
+  const selectedScopes = selected ? getScopesForBet(selected.id).map(markScopeAuditState) : [];
+
+  const futureBets = bets.filter(b => {
+    const hasScopes = state.scopes.some(s => s.bet_id === b.id);
+    const hasTasks = state.tasks.some(t => state.scopes.some(s => s.id === t.scope_id && s.bet_id === b.id));
+    return !hasScopes && !hasTasks;
+  });
+
+  let html = '';
+  if (!WRITES_ENABLED) {
+    html += '<div class="readonly-banner">Development data is shown read-only. Writes are disabled to respect current anon RLS permissions.</div>';
+  }
+
+  if (isTimMode()) {
+    const myTasks = [...visibleTasks].sort((a, b) => {
+      const pa = Number(a.priority || 999);
+      const pb = Number(b.priority || 999);
+      return pa - pb;
+    });
+
+    html += '<div class="card" style="margin-bottom:16px">';
+    html += '<div class="card-title">My Tasks (Tim)</div>';
+    if (!myTasks.length) {
+      html += '<div class="hint">No Tim-owned tasks currently visible.</div>';
+    } else {
+      html += '<table class="mytasks-table"><thead><tr><th>Priority</th><th>Task</th><th>Status</th><th>Scope</th></tr></thead><tbody>';
+      myTasks.forEach(t => {
+        const scope = state.scopes.find(s => s.id === t.scope_id);
+        html += `<tr>
+          <td>${t.priority ?? '—'}</td>
+          <td>${t.name}</td>
+          <td><span class="badge ${t.status || 'todo'}">${STATUS_LABELS[t.status] || t.status || 'todo'}</span></td>
+          <td>${scope ? scope.name : '—'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+  }
+
+  html += '<div class="card" style="margin-bottom:16px">';
+  html += '<div class="card-title">Current Bet Detail</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+  bets.forEach(b => {
+    html += `<button class="tab ${selected && selected.id===b.id?'active':''}" onclick="selectedBet=${b.id};render()">Bet ${b.id}: ${b.name}</button>`;
+  });
+  html += '</div>';
+
+  if (selected) {
+    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div>
+        <h2><span>Bet ${selected.id}:</span> ${selected.name}</h2>
+        <div class="deliverable">${selected.deliverable || ''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="hint">Appetite</div>
+        <div style="font-size:18px;font-weight:800;color:var(--orange)">${selected.appetite || '—'}</div>
+      </div>
+    </div>`;
+
+    if (!selectedScopes.length) {
+      html += '<div class="empty-state" style="margin-top:12px">No scoped development items yet for this bet.</div>';
+    } else {
+      html += `<div class="hill-container" style="margin-top:12px">${hillSVG(selectedScopes, false)}</div>`;
+      html += '<div style="margin-top:8px">';
+      selectedScopes.forEach((s, i) => {
+        const scopeTasks = visibleTasks.filter(t => t.scope_id === s.id);
+        const doneTasks = scopeTasks.filter(t => t.status === 'done').length;
+        const totalTasks = scopeTasks.length;
+        const auditedBadge = s.__allReset ? ' <span class="pill" style="background:#374151;color:#cbd5e1">audited reset</span>' : '';
+        html += `<div class="scope-row">
+          <div class="scope-dot" style="background:${s.__allReset ? '#9ca3af' : SCOPE_COLORS[i % SCOPE_COLORS.length]}"></div>
+          <div style="flex:1">
+            <span class="scope-name">${s.name}</span>${auditedBadge}
+            <div class="hint">${doneTasks}/${totalTasks} tasks done</div>
+          </div>
+          <span class="scope-hill-label ${s.status === 'done' ? 'done' : Number(s.hill_position) >= 50 ? 'downhill' : 'uphill'}">${s.hill_position || 0}%</span>
+        </div>`;
+      });
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+
+  if (futureBets.length) {
+    html += '<div class="card" style="margin-bottom:16px"><div class="card-title">Betting Table (Next Cycle Candidates)</div>';
+    futureBets.forEach(b => {
+      html += `<div class="scope-row">
+        <div style="flex:1"><strong>${b.name}</strong><div class="hint">Will be shaped when picked up</div></div>
+        <div class="hint">${b.appetite || '—'}</div>
+      </div>`;
+    });
+    html += '<div class="hint" style="margin-top:8px">Add pitch links to each candidate bet once shaping starts.</div></div>';
+  }
+
+  const blockedNeedingDiscussion = visibleTasks.filter(t => {
+    if (t.status !== 'blocked') return false;
+    const blob = `${t.name || ''} ${t.description || ''} ${t.notes || ''}`.toLowerCase();
+    return blob.includes('needs discussion') || blob.includes('#discussion') || blob.includes('co-founder');
+  });
+  html += '<div class="card" style="margin-bottom:16px"><div class="card-title">Decisions Needed Queue</div>';
+  if (!blockedNeedingDiscussion.length) html += '<div class="hint">No blocked items flagged for discussion.</div>';
+  else blockedNeedingDiscussion.forEach(t => {
+    const scope = state.scopes.find(s => s.id === t.scope_id);
+    html += `<div class="decision-item"><strong>${t.name}</strong><div class="hint">${scope ? scope.name : 'Unknown scope'} • owner: ${t.owner || '—'}</div></div>`;
+  });
+  html += '</div>';
+
+  const completedBets = bets.filter(b => getBetStatus(b) === 'done').sort((a, b) => a.id - b.id);
+  if (completedBets.length) {
+    html += '<div class="card" style="margin-bottom:16px"><div class="card-title">Cool-Down Windows</div>';
+    completedBets.forEach(doneBet => {
+      const nextBet = bets.find(b => b.id > doneBet.id);
+      if (!nextBet) return;
+      const cooldownWeeks = doneBet.cooldown_weeks || 2;
+      html += `<div class="scope-row"><div style="flex:1">After Bet ${doneBet.id} before Bet ${nextBet.id}</div><div>${cooldownWeeks}-week cool-down: cleanup, bugs, exploration</div></div>`;
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="card"><div class="card-title">Plugin Matrix (Merged from old Plugins tab)</div>';
+  html += '<div style="overflow-x:auto"><table class="matrix-table"><thead><tr><th>Plugin</th>';
+  state.phases.forEach(p => { html += `<th>P${p.id}</th>`; });
+  html += '</tr></thead><tbody>';
+  PLUGINS_STATIC.forEach(plugin => {
+    html += `<tr><td>${plugin.name}</td>`;
+    state.phases.forEach(p => {
+      const has = plugin.phases.includes(p.id);
+      html += has ? `<td><div class="matrix-cell ${plugin.isTracker?'track':'doc'}">${plugin.isTracker?'T':'D'}</div></td>` : '<td><div class="matrix-cell empty"></div></td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div></div>';
+
+  html += '<div class="card" style="margin-top:16px"><div class="card-title">Existing Capability by Phase</div>';
   state.phases.forEach(p => {
     const color = p.coverage >= 70 ? 'var(--green)' : p.coverage >= 30 ? 'var(--yellow)' : 'var(--red)';
     html += `<div class="phase-row" onclick="expandedPhase=expandedPhase===${p.id}?null:${p.id};render()">
@@ -652,39 +815,34 @@ function renderOverview(el) {
       html += '</div>';
     }
   });
-  html += '</div>';
+  html += `<div class="hint" style="margin-top:8px"><span class="tooltip" title="Percentage of this phase that existing Arktis plugins could theoretically handle. Does NOT indicate product readiness.">Plugin Coverage</span> reflects theoretical capability, not product readiness.</div></div>`;
 
-  // Milestones
-  html += '<div class="card"><div class="card-title">Milestones & Revenue</div>';
+  html += '<div class="card" style="margin-top:16px"><div class="card-title">Milestones (Derived from Bet Dependencies)</div>';
   state.milestones.forEach((m, i) => {
-    const milestoneStatus = getMilestoneDisplayStatus(m, betStatusById);
+    const mStatus = deriveMilestoneStatus(m);
     html += `<div class="milestone">
       <div class="milestone-dot-col">
-        <div class="milestone-dot ${milestoneStatus === 'not_started' ? '' : milestoneStatus}">${m.id}</div>
+        <div class="milestone-dot ${mStatus}">${m.id}</div>
         ${i < state.milestones.length - 1 ? '<div class="milestone-line"></div>' : ''}
       </div>
       <div class="milestone-content">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="milestone-name">${m.name}</div>
-          <span class="badge ${milestoneStatus}">${STATUS_LABELS[milestoneStatus]||milestoneStatus}</span>
-        </div>
+        <div style="display:flex;align-items:center;gap:8px"><div class="milestone-name">${m.name}</div><span class="badge ${mStatus}">${STATUS_LABELS[mStatus] || mStatus}</span></div>
         <div class="milestone-criteria">${m.criteria||''}</div>
         ${m.revenue ? `<div class="milestone-revenue">${m.revenue}</div>` : ''}
         ${m.bet_ids && m.bet_ids.length ? `<div class="milestone-bets">${m.bet_ids.map(b=>`<span class="milestone-bet-tag">Bet ${b}</span>`).join('')}</div>` : ''}
       </div>
     </div>`;
   });
-  html += '</div></div>';
+  html += '</div>';
 
-  // Bet cards
   html += '<div class="grid-5" style="margin-top:20px">';
   state.bets.forEach(bet => {
-    const betScopes = betScopesById.get(bet.id) || [];
-    const betStatus = betStatusById.get(bet.id) || 'not_started';
-    html += `<div class="bet-card" onclick="setView('bets');selectedBet=${bet.id};render()">
+    const betScopes = state.scopes.filter(s => s.bet_id === bet.id).map(markScopeAuditState);
+    const status = getBetStatus(bet);
+    html += `<div class="bet-card" onclick="setView('dev');selectedBet=${bet.id};render()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <span class="bet-num">#${bet.id}</span>
-        <span class="badge ${betStatus}">${STATUS_LABELS[betStatus]||betStatus}</span>
+        <span class="badge ${status}">${STATUS_LABELS[status]||status}</span>
       </div>
       <div class="bet-name">${bet.name}</div>
       <div class="bet-appetite">${bet.appetite}</div>
@@ -693,596 +851,153 @@ function renderOverview(el) {
     </div>`;
   });
   html += '</div>';
-
-  el.innerHTML = html;
-}
-
-function renderBets(el) {
-  const betScopesById = new Map(state.bets.map(bet => [bet.id, state.scopes.filter(s => s.bet_id === bet.id)]));
-  const betStatusById = new Map(state.bets.map(bet => [bet.id, getBetDisplayStatus(bet, betScopesById.get(bet.id) || [])]));
-  let html = '<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
-  state.bets.forEach(bet => {
-    html += `<button class="tab ${selectedBet===bet.id?'active':''}" onclick="selectedBet=selectedBet===${bet.id}?null:${bet.id};expandedScopes.clear();render()">Bet ${bet.id}: ${bet.name}</button>`;
-  });
-  html += '</div>';
-
-  if (selectedBet) {
-    const bet = state.bets.find(b => b.id === selectedBet);
-    const betScopes = betScopesById.get(bet.id) || [];
-    const betStatus = betStatusById.get(bet.id) || 'not_started';
-
-    // Header row: bet info + status + appetite
-    html += `<div class="card" style="margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
-        <div style="flex:1;min-width:300px">
-          <h2 style="font-size:22px;font-weight:800;margin-bottom:4px"><span style="color:var(--blue)">Bet ${bet.id}:</span> ${bet.name}</h2>
-          <p style="color:var(--muted);font-size:14px">${bet.deliverable||''}</p>
-        </div>
-        <div style="display:flex;gap:16px;align-items:center">
-          <div>
-            <div style="font-size:11px;color:var(--dim)">Status</div>
-            <select class="status-select" onchange="updateBetStatus(${bet.id},this.value)" style="font-size:13px;font-weight:700">
-              ${['not_started','in_progress','done','paused'].map(s=>`<option value="${s}" ${betStatus===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
-            </select>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:11px;color:var(--dim)">Appetite</div>
-            <div style="font-size:18px;font-weight:800;color:var(--orange)">${bet.appetite}</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:11px;color:var(--dim)">Priority</div>
-            <div style="font-size:18px;font-weight:800;color:var(--blue)">${bet.priority}</div>
-          </div>
-        </div>
-      </div>
-      ${bet.tim_needed ? `<div class="tim-gate" style="margin-top:12px"><div class="tim-title">Tim's Input Required</div><div class="tim-desc">This bet is gated on Tim documenting operational logic in the Tim Input Worksheet.</div></div>` : ''}
-    </div>`;
-
-    // Hill chart card
-    html += `<div class="card" style="margin-bottom:16px">
-      <div class="card-title">Hill Chart</div>
-      <div class="hill-container">${hillSVG(betScopes, false)}</div>
-    </div>`;
-
-    // Scope list with expandable tasks
-    html += '<div class="card"><div class="card-title">Scopes & Tasks</div>';
-
-    betScopes.forEach((s, i) => {
-      const c = getScopeColor(s, i);
-      const scopeTasks = state.tasks.filter(t => t.scope_id === s.id);
-      const doneTasks = scopeTasks.filter(t => t.status === 'done').length;
-      const totalTasks = scopeTasks.length;
-      const isExpanded = expandedScopes.has(s.id);
-      const hillClass = s.status === 'done' ? 'done' : s.hill_position >= 50 ? 'downhill' : 'uphill';
-
-      // Scope header row (clickable to expand)
-      html += `<div class="scope-row scope-expandable" onclick="toggleScope(${s.id})">
-        <span class="scope-chevron ${isExpanded?'open':''}">&#9654;</span>
-        <div class="scope-dot" style="background:${c}"></div>
-        <div style="flex:1;min-width:0">
-          <span class="scope-name">${s.name}</span>
-          <div class="scope-progress">
-            ${scopeTasks.map(t => {
-              const tc = t.status === 'done' ? 'var(--green)' : t.status === 'in_progress' ? 'var(--blue)' : t.status === 'blocked' ? 'var(--red)' : 'var(--border)';
-              return `<div class="scope-progress-dot" style="background:${tc}" title="${t.name}: ${t.status}"></div>`;
-            }).join('')}
-          </div>
-        </div>
-        <span class="scope-summary">${doneTasks}/${totalTasks} tasks</span>
-        <div class="scope-editor" onclick="event.stopPropagation()">
-          <input type="range" class="scope-slider" min="0" max="100" value="${s.hill_position}"
-            onchange="updateScopeHill(${s.id},parseInt(this.value))" ${s.status==='done'?'disabled':''}>
-          <span class="scope-hill-label ${hillClass}">${s.hill_position}%</span>
-          <button class="scope-done-btn ${s.status==='done'?'is-done':''}"
-            onclick="updateScopeStatus(${s.id},${s.status==='done'?"'in_progress'":"'done'"})">
-            ${s.status==='done'?'Undo':'Done'}
-          </button>
-        </div>
-      </div>`;
-
-      // Expanded task list
-      if (isExpanded) {
-        html += '<div class="task-list">';
-        scopeTasks.forEach(t => {
-          const checkClass = t.status;
-          const checkIcon = t.status === 'done' ? '&#10003;' : t.status === 'in_progress' ? '&#9654;' : t.status === 'blocked' ? '!' : '';
-          html += `<div class="task-item">
-            <div class="task-checkbox ${checkClass}" onclick="cycleTaskStatus(${t.id})" title="Click to cycle: todo → in progress → done">${checkIcon}</div>
-            <div class="task-body">
-              <div class="task-name ${t.status==='done'?'done':''}">${t.name}</div>
-              ${t.description ? `<div class="task-desc">${t.description}</div>` : ''}
-              <div class="task-meta">
-                ${t.owner ? `<span class="task-owner ${t.owner}">${t.owner}</span>` : ''}
-                <button class="task-status-btn" onclick="setTaskStatus(${t.id},'blocked')" ${t.status==='blocked'?'style="border-color:var(--red);color:var(--red)"':''}>
-                  ${t.status==='blocked'?'Unblock':'Block'}
-                </button>
-              </div>
-              ${t.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;padding:4px 8px;background:var(--surface);border-radius:4px;white-space:pre-wrap">${t.notes}</div>` : ''}
-              <textarea class="task-notes-input" id="notes-${t.id}" placeholder="Add notes..." rows="1"
-                onfocus="this.rows=3;_activeNotesTaskId=${t.id}"
-                oninput="onNotesInput(${t.id},this.value)"
-                onblur="this.rows=1;onNotesBlur(${t.id},this.value)">${t.notes||''}</textarea>
-            </div>
-          </div>`;
-        });
-        html += '</div>';
-
-        // Add task input
-        html += `<div class="add-task-row">
-          <input type="text" class="add-task-input" id="new-task-${s.id}" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addTask(${s.id})">
-          <button class="add-task-btn" onclick="addTask(${s.id})">Add</button>
-        </div>`;
-      }
-    });
-
-    html += '</div>';
-
-  } else {
-    // No bet selected — show overview cards for all bets
-    html += '<div style="display:grid;grid-template-columns:1fr;gap:16px">';
-    state.bets.forEach(bet => {
-      const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
-      const allTasks = state.tasks.filter(t => betScopes.some(s => s.id === t.scope_id));
-      const doneTasks = allTasks.filter(t => t.status === 'done').length;
-      const inProgressTasks = allTasks.filter(t => t.status === 'in_progress').length;
-      const blockedTasks = allTasks.filter(t => t.status === 'blocked').length;
-      const totalTasks = allTasks.length;
-      const pctDone = totalTasks > 0 ? Math.round(doneTasks / totalTasks * 100) : 0;
-
-      html += `<div class="card" style="cursor:pointer" onclick="selectedBet=${bet.id};render()">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-          <div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:20px;font-weight:800;color:var(--blue)">#${bet.id}</span>
-              <span style="font-size:16px;font-weight:700">${bet.name}</span>
-              <span class="badge ${betStatusById.get(bet.id) || 'not_started'}">${STATUS_LABELS[betStatusById.get(bet.id) || 'not_started'] || betStatusById.get(bet.id) || 'not_started'}</span>
-            </div>
-            <p style="font-size:13px;color:var(--muted);margin-top:4px">${bet.deliverable||''}</p>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:18px;font-weight:800;color:var(--orange)">${bet.appetite}</div>
-            ${bet.tim_needed ? '<div style="font-size:10px;color:var(--yellow);font-weight:600;margin-top:2px">Needs Tim</div>' : ''}
-          </div>
-        </div>
-        <div style="display:flex;gap:20px;align-items:center">
-          <div style="flex:1">${hillSVG(betScopes, true)}</div>
-          <div style="min-width:140px">
-            <div style="font-size:11px;color:var(--dim);margin-bottom:4px">Task Progress</div>
-            <div style="background:var(--bg);border-radius:4px;height:8px;overflow:hidden;margin-bottom:6px">
-              <div style="height:100%;width:${pctDone}%;background:var(--green);border-radius:4px"></div>
-            </div>
-            <div style="font-size:12px;display:flex;gap:10px">
-              <span style="color:var(--green);font-weight:700">${doneTasks} done</span>
-              <span style="color:var(--blue)">${inProgressTasks} active</span>
-              ${blockedTasks > 0 ? `<span style="color:var(--red)">${blockedTasks} blocked</span>` : ''}
-              <span style="color:var(--dim)">${totalTasks} total</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-          ${betScopes.map((s, i) => {
-            const sc = getScopeColor(s, i);
-            const st = state.tasks.filter(t => t.scope_id === s.id);
-            const sd = st.filter(t => t.status === 'done').length;
-            return `<div style="background:var(--bg);border-radius:6px;padding:6px 10px;font-size:11px;display:flex;align-items:center;gap:6px;border-left:3px solid ${sc}">
-              <span style="font-weight:600">${s.name}</span>
-              <span style="color:var(--dim)">${sd}/${st.length}</span>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-    });
-    html += '</div>';
-  }
-
-  el.innerHTML = html;
-}
-
-function renderPlugins(el) {
-  let html = '<div class="card-title">Plugin x Phase Matrix</div>';
-  html += '<div class="card" style="overflow-x:auto"><table class="matrix-table"><thead><tr><th>Plugin</th>';
-  state.phases.forEach(p => { html += `<th>P${p.id}</th>`; });
-  html += '</tr></thead><tbody>';
-
-  PLUGINS_STATIC.forEach(plugin => {
-    html += `<tr><td>${plugin.name}</td>`;
-    state.phases.forEach(p => {
-      const has = plugin.phases.includes(p.id);
-      if (has) {
-        html += `<td><div class="matrix-cell ${plugin.isTracker?'track':'doc'}">${plugin.isTracker?'T':'D'}</div></td>`;
-      } else {
-        html += '<td><div class="matrix-cell empty"></div></td>';
-      }
-    });
-    html += '</tr>';
-  });
-
-  // Gap row
-  html += '<tr class="gap-row"><td style="font-weight:700;color:var(--red)">MISSING</td>';
-  state.phases.forEach(p => {
-    const gap = 100 - p.coverage;
-    const color = p.coverage === 0 ? 'var(--red)' : p.coverage < 80 ? 'var(--yellow)' : 'var(--green)';
-    html += `<td><span class="gap-pct" style="color:${color}">${gap}%</span></td>`;
-  });
-  html += '</tr></tbody></table>';
-
-  html += '<div class="legend"><div class="legend-item"><div class="legend-swatch" style="background:#166534">D</div><span>Document generation</span></div>';
-  html += '<div class="legend-item"><div class="legend-swatch" style="background:var(--blue-dim)">T</div><span>Tracking only</span></div></div>';
-  html += '</div>';
-
-  html += `<div class="orchestration-note"><h3>The Orchestration Gap</h3>
-    <p>Plugins work independently. The invoicer doesn't check the screening report. The shipping docs don't validate against the Carnet item list.
-    The OC doesn't reference the EUC. Each plugin is correct in isolation, but mission-level consistency — catching the HS code that drifted
-    between the CI and the COO — doesn't exist yet. <span>This is what the consistency engine (Bet 1) solves.</span></p></div>`;
-
   el.innerHTML = html;
 }
 
 function renderActivity(el) {
-  let html = '<div class="grid-2">';
+  const syntheticMissionEvents = state.missions.map(m => ({
+    created_at: m.updated_at || m.created_at,
+    actor: m.owner || 'System',
+    action: 'mission event',
+    target_type: 'mission',
+    target_id: String(m.id),
+    details: { mission: m.client_name, status: m.status },
+  }));
+  const unified = [...state.activity, ...syntheticMissionEvents]
+    .filter(activityVisibleForActor)
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, 80);
 
-  // Activity log
-  html += '<div class="card"><div class="card-title">Recent Activity</div>';
-  if (state.activity.length === 0) {
-    html += '<div style="color:var(--dim);font-size:13px;padding:12px 0">No activity yet. Changes to bets, scopes, and milestones will appear here.</div>';
+  let html = '<div class="card"><div class="card-title">Unified Activity Log (Missions + Development)</div>';
+  if (!unified.length) {
+    html += '<div class="hint">No activity visible for this actor.</div>';
   } else {
-    state.activity.forEach(a => {
+    unified.forEach(a => {
       const time = new Date(a.created_at).toLocaleString('en-CH', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
       html += `<div class="activity-item">
         <span class="activity-time">${time}</span>
         <span class="activity-actor">${a.actor}</span>
-        <span class="activity-text">${a.action} on ${a.target_type} #${a.target_id}</span>
+        <span class="activity-text">${a.action} on ${a.target_type} #${a.target_id}${a.details?.mission ? ` • ${a.details.mission}` : ''}</span>
       </div>`;
     });
   }
   html += '</div>';
-
-  // Decision log
-  html += '<div class="card"><div class="card-title">Decision Log</div>';
-  state.decisions.forEach(d => {
-    html += `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1e293b">
-      <div style="font-size:12px;color:var(--dim)">${d.decision_date}</div>
-      <div style="font-size:13px;font-weight:600;margin-top:2px">${d.decision}</div>
-      ${d.context ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">${d.context}</div>` : ''}
-    </div>`;
-  });
-  html += '</div></div>';
-
   el.innerHTML = html;
 }
 
-function renderTimeline(el) {
-  const now = new Date();
-  const betScopesById = new Map(state.bets.map(bet => [bet.id, state.scopes.filter(s => s.bet_id === bet.id)]));
-  const betStatusById = new Map(state.bets.map(bet => [bet.id, getBetDisplayStatus(bet, betScopesById.get(bet.id) || [])]));
-  let html = '';
+function renderMetrics(el) {
+  const visibleTasks = getVisibleTasks();
+  const scopeCycleTimes = state.scopes
+    .filter(s => s.status === 'done')
+    .map(scope => {
+      const scopedTasks = visibleTasks.filter(t => t.scope_id === scope.id);
+      const touchedAt = scopedTasks
+        .map(t => t.updated_at || t.created_at)
+        .filter(Boolean)
+        .map(ts => new Date(ts).getTime())
+        .sort((a, b) => a - b)[0];
 
-  // === SECTION 1: Bet Timeline Bars ===
-  html += '<div class="card timeline-section"><div class="card-title">Bet Timelines</div>';
+      const doneEvent = state.activity.find(a =>
+        a.target_type === 'scope' &&
+        String(a.target_id) === String(scope.id) &&
+        String(a.action || '').includes('done')
+      );
+      const doneAt = doneEvent?.created_at ? new Date(doneEvent.created_at).getTime() : null;
+      if (!touchedAt || !doneAt) return null;
+      const days = Math.max(0, Math.round((doneAt - touchedAt) / 86400000));
+      return { scope, days };
+    })
+    .filter(Boolean);
 
-  state.bets.forEach(bet => {
-    const betStatus = betStatusById.get(bet.id) || 'not_started';
-    // Parse appetite weeks from string like "6 weeks"
-    const appetiteMatch = bet.appetite ? bet.appetite.match(/(\d+)/) : null;
-    const appetiteWeeks = appetiteMatch ? parseInt(appetiteMatch[1]) : 0;
-    const appetiteDays = appetiteWeeks * 7;
+  const avgCycleDays = scopeCycleTimes.length
+    ? Math.round(scopeCycleTimes.reduce((sum, x) => sum + x.days, 0) / scopeCycleTimes.length)
+    : null;
 
-    const started = bet.started_at ? new Date(bet.started_at) : null;
-    const completed = bet.completed_at ? new Date(bet.completed_at) : null;
-    const deadline = started ? new Date(started.getTime() + appetiteDays * 86400000) : null;
+  const burndownByBet = state.bets.map(b => {
+    const scopeIds = state.scopes.filter(s => s.bet_id === b.id).map(s => s.id);
+    const betTasks = visibleTasks.filter(t => scopeIds.includes(t.scope_id));
+    const done = betTasks.filter(t => t.status === 'done').length;
+    const remaining = betTasks.length - done;
+    return { bet: b, done, remaining, total: betTasks.length };
+  });
 
-    let fillPct = 0;
-    let colorClass = 'var(--dim)';
-    let statusText = 'Not started';
-    let barColor = 'var(--surface2)';
+  const hillByBet = state.bets.map(b => {
+    const snapshots = state.hillSnapshots.filter(s => {
+      if (s.bet_id) return Number(s.bet_id) === Number(b.id);
+      if (!s.scope_id) return false;
+      const scope = state.scopes.find(sc => Number(sc.id) === Number(s.scope_id));
+      return scope && Number(scope.bet_id) === Number(b.id);
+    });
+    if (snapshots.length < 2) return { bet: b, trend: null };
+    const sorted = [...snapshots].sort((a, b2) => new Date(a.created_at) - new Date(b2.created_at));
+    const first = Number(sorted[0].hill_position ?? sorted[0].position ?? 0);
+    const last = Number(sorted[sorted.length - 1].hill_position ?? sorted[sorted.length - 1].position ?? 0);
+    return { bet: b, trend: last - first };
+  });
 
-    if (betStatus === 'done' && completed) {
-      fillPct = 100;
-      barColor = 'var(--green)';
-      statusText = 'Completed ' + completed.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' });
-    } else if (started && deadline) {
-      const totalDuration = deadline.getTime() - started.getTime();
-      const elapsed = now.getTime() - started.getTime();
-      fillPct = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
+  let html = '<div class="metric-grid">';
+  html += `<div class="card"><div class="card-title">Scope Cycle Time</div><div style="font-size:28px;font-weight:800;color:var(--blue)">${avgCycleDays ?? '—'}${avgCycleDays !== null ? 'd' : ''}</div><div class="hint">Days from first task touch to scope done.</div></div>`;
+  html += `<div class="card"><div class="card-title">Velocity</div><div style="font-size:28px;font-weight:800;color:var(--green)">${visibleTasks.filter(t=>t.status==='done').length}</div><div class="hint">Done tasks in current visible dataset.</div></div>`;
+  html += `<div class="card"><div class="card-title">Mission Revenue</div><div style="font-size:28px;font-weight:800;color:var(--yellow)">€${Math.round(state.missions.reduce((s,m)=>s+Number(m.revenue_actual||0),0)).toLocaleString('en-CH')}</div><div class="hint">Total actual revenue logged in missions.</div></div>`;
+  html += '</div>';
 
-      if (fillPct < 60) { barColor = 'var(--green)'; }
-      else if (fillPct < 85) { barColor = 'var(--orange)'; }
-      else { barColor = 'var(--red)'; }
-
-      const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / 86400000);
-      statusText = daysLeft > 0 ? daysLeft + 'd remaining' : Math.abs(daysLeft) + 'd overdue';
-    }
-
-    const startLabel = started ? started.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' }) : '—';
-    const deadlineLabel = deadline ? deadline.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' }) : '—';
-    const nowPct = (started && deadline) ? Math.max(0, Math.min(100, ((now.getTime() - started.getTime()) / (deadline.getTime() - started.getTime())) * 100)) : 0;
-
-    html += `<div class="bet-timeline">
-      <div class="bet-timeline-header">
-        <div>
-          <span class="bet-timeline-name" style="color:var(--blue)">Bet ${bet.id}:</span>
-          <span class="bet-timeline-name">${bet.name}</span>
-        </div>
-        <div class="bet-timeline-dates">
-          ${started ? startLabel + ' → ' + deadlineLabel + ' (' + appetiteWeeks + 'w)' : appetiteWeeks + ' weeks appetite'}
-        </div>
-      </div>
-      <div class="bet-timeline-bar-bg">
-        <div class="bet-timeline-fill" style="width:${fillPct}%;background:${barColor}"></div>
-        ${started && betStatus !== 'done' ? `<div class="bet-timeline-now" style="left:${nowPct}%"></div>` : ''}
-        <div class="bet-timeline-label">${betStatus === 'done' ? '✓ ' : ''}${statusText}</div>
-        ${fillPct > 0 && fillPct < 100 ? `<div class="bet-timeline-pct">${Math.round(fillPct)}%</div>` : ''}
-      </div>
+  html += '<div class="card" style="margin-top:16px"><div class="card-title">Burndown by Bet vs Appetite</div>';
+  burndownByBet.forEach(row => {
+    const pct = row.total ? Math.round((row.done / row.total) * 100) : 0;
+    html += `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span>Bet ${row.bet.id}: ${row.bet.name} (${row.bet.appetite || 'n/a'})</span><span>${row.done} done / ${row.remaining} remaining</span></div>
+      <div style="background:var(--bg);height:8px;border-radius:999px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--green)"></div></div>
     </div>`;
   });
   html += '</div>';
 
-  // === SECTION 2: Weekly Velocity Chart ===
-  html += '<div class="card timeline-section"><div class="card-title">Weekly Velocity</div>';
-
-  // Build velocity data from activity log (last 8 weeks)
-  const eightWeeksAgo = new Date(now.getTime() - 8 * 7 * 86400000);
-  const weekBuckets = {};
-  // Initialize 8 week slots
-  for (let i = 7; i >= 0; i--) {
-    const weekStart = new Date(now.getTime() - i * 7 * 86400000);
-    // Snap to Monday
-    const day = weekStart.getDay();
-    const mondayOffset = day === 0 ? -6 : 1 - day;
-    weekStart.setDate(weekStart.getDate() + mondayOffset);
-    weekStart.setHours(0, 0, 0, 0);
-    const key = weekStart.toISOString().split('T')[0];
-    if (!weekBuckets[key]) weekBuckets[key] = { completed: 0, started: 0 };
-  }
-
-  // Fill from activity data
-  (state.activity || []).forEach(a => {
-    if (!a.created_at) return;
-    const d = new Date(a.created_at);
-    if (d < eightWeeksAgo) return;
-    const day = d.getDay();
-    const mondayOffset = day === 0 ? -6 : 1 - day;
-    const monday = new Date(d);
-    monday.setDate(monday.getDate() + mondayOffset);
-    monday.setHours(0, 0, 0, 0);
-    const key = monday.toISOString().split('T')[0];
-    if (!weekBuckets[key]) weekBuckets[key] = { completed: 0, started: 0 };
-    if (a.action && a.action.includes('done')) weekBuckets[key].completed++;
-    if (a.action && a.action.includes('in_progress')) weekBuckets[key].started++;
+  html += '<div class="card" style="margin-top:16px"><div class="card-title">Hill Position Trend</div>';
+  const withTrend = hillByBet.filter(r => r.trend !== null);
+  if (!withTrend.length) html += '<div class="hint">Not enough hill snapshot history yet.</div>';
+  else withTrend.forEach(r => {
+    const color = r.trend >= 0 ? 'var(--green)' : 'var(--red)';
+    const sign = r.trend >= 0 ? '+' : '';
+    html += `<div class="scope-row"><div style="flex:1">Bet ${r.bet.id}: ${r.bet.name}</div><div style="color:${color};font-weight:700">${sign}${r.trend.toFixed(1)} pts</div></div>`;
   });
-
-  const weeks = Object.entries(weekBuckets).sort((a, b) => a[0].localeCompare(b[0]));
-  const maxVal = Math.max(1, ...weeks.map(([, v]) => Math.max(v.completed, v.started)));
-
-  if (weeks.length === 0) {
-    html += '<div style="color:var(--dim);font-size:13px;padding:12px 0">No activity data yet.</div>';
-  } else {
-    html += '<div class="velocity-chart">';
-    weeks.forEach(([weekKey, v]) => {
-      const weekDate = new Date(weekKey);
-      const label = weekDate.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' });
-      const completedH = Math.max(2, (v.completed / maxVal) * 70);
-      const startedH = Math.max(2, (v.started / maxVal) * 70);
-
-      html += `<div class="velocity-week">
-        <div class="velocity-bars">
-          <div class="velocity-bar" style="height:${completedH}px;background:var(--green)" title="${v.completed} completed">
-            ${v.completed > 0 ? `<span class="velocity-bar-count" style="color:var(--green)">${v.completed}</span>` : ''}
-          </div>
-          <div class="velocity-bar" style="height:${startedH}px;background:var(--blue)" title="${v.started} started">
-            ${v.started > 0 ? `<span class="velocity-bar-count" style="color:var(--blue)">${v.started}</span>` : ''}
-          </div>
-        </div>
-        <div class="velocity-label">${label}</div>
-      </div>`;
-    });
-    html += '</div>';
-    html += '<div style="display:flex;gap:16px;margin-top:12px;font-size:11px;color:var(--muted)">';
-    html += '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--green)"></span> Completed</span>';
-    html += '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--blue)"></span> Started</span>';
-    html += '</div>';
-  }
-  html += '</div>';
-
-  // === SECTION 3: Hill Movement Sparklines ===
-  html += '<div class="card timeline-section"><div class="card-title">Hill Movement (Last 4 Weeks)</div>';
-
-  const snapshots = state.hillSnapshots || [];
-  const fourWeeksAgo = new Date(now.getTime() - 28 * 86400000).toISOString().split('T')[0];
-
-  // Group by bet
-  state.bets.forEach(bet => {
-    const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
-    if (betScopes.length === 0) return;
-
-    html += `<div style="margin-bottom:16px">`;
-    html += `<div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Bet ${bet.id}: ${bet.name}</div>`;
-
-    betScopes.forEach((scope, i) => {
-      const scopeSnaps = snapshots
-        .filter(s => s.scope_id === scope.id && s.snapshot_date >= fourWeeksAgo)
-        .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date));
-
-      // Build 4 weekly data points (most recent snapshot per week)
-      const weeklyPoints = [];
-      for (let w = 3; w >= 0; w--) {
-        const weekEnd = new Date(now.getTime() - w * 7 * 86400000);
-        const weekStart = new Date(weekEnd.getTime() - 7 * 86400000);
-        const weekEndStr = weekEnd.toISOString().split('T')[0];
-        const weekStartStr = weekStart.toISOString().split('T')[0];
-        const inWeek = scopeSnaps.filter(s => s.snapshot_date >= weekStartStr && s.snapshot_date <= weekEndStr);
-        if (inWeek.length > 0) {
-          weeklyPoints.push(inWeek[inWeek.length - 1].hill_position);
-        } else if (w === 0) {
-          // Current week: use live hill_position
-          weeklyPoints.push(scope.hill_position);
-        } else {
-          weeklyPoints.push(null);
-        }
-      }
-
-      const c = scope.status === 'done' ? 'var(--green)' : SCOPE_COLORS[i % SCOPE_COLORS.length];
-      const hasData = weeklyPoints.some(p => p !== null);
-
-      html += `<div class="hill-sparkline-row">
-        <div class="scope-dot" style="background:${c}"></div>
-        <div class="hill-sparkline-name">${scope.name}</div>
-        <div class="sparkline-container">`;
-
-      if (hasData) {
-        weeklyPoints.forEach(p => {
-          if (p !== null) {
-            const h = Math.max(2, (p / 100) * 18);
-            html += `<div class="sparkline-dot" style="height:${h}px;background:${c}" title="${p}%"></div>`;
-          } else {
-            html += `<div class="sparkline-dot" style="height:2px;background:var(--border)"></div>`;
-          }
-        });
-      } else {
-        // No snapshot data — show flat dots at current position
-        for (let d = 0; d < 4; d++) {
-          const h = Math.max(2, (scope.hill_position / 100) * 18);
-          const opacity = d < 3 ? '0.3' : '1';
-          html += `<div class="sparkline-dot" style="height:${h}px;background:${c};opacity:${opacity}"></div>`;
-        }
-      }
-
-      html += `</div>
-        <div class="hill-sparkline-value">${scope.hill_position}%</div>
-      </div>`;
-    });
-
-    html += '</div>';
-  });
-
-  html += '<div style="font-size:11px;color:var(--dim);margin-top:8px">Sparklines show hill position snapshots per week. Dots fill in as hill positions are updated over time.</div>';
   html += '</div>';
 
   el.innerHTML = html;
 }
 
-function renderDocs(el) {
-  let html = '';
+function renderHelpModal() {
+  const existing = document.getElementById('help-modal');
+  if (!helpOpen) {
+    if (existing) existing.remove();
+    return;
+  }
+  if (existing) existing.remove();
 
-  // --- What is this ---
-  html += `<div class="card" style="margin-bottom:20px">
-    <div class="card-title">What is FlowSpex Mission Control?</div>
-    <p style="font-size:14px;line-height:1.7;color:var(--muted);max-width:800px">
-      FlowSpex is a <strong style="color:var(--text)">mission control engine for export compliance</strong> — managing the full lifecycle from first customer inquiry to final documentation archive.
-      It orchestrates the 37+ steps, 12+ documents, 6+ authorities, and 8–14 weeks that a typical deep-tech export mission requires.
-    </p>
-    <p style="font-size:14px;line-height:1.7;color:var(--muted);max-width:800px;margin-top:12px">
-      This dashboard tracks the <strong style="color:var(--text)">Shape Up master plan</strong> — 5 time-boxed bets that build FlowSpex from foundation to full product. Each bet has scopes tracked on hill charts (left = figuring it out, right = executing).
-    </p>
-  </div>`;
-
-  // --- 6 Phases explained ---
-  html += `<div class="card" style="margin-bottom:20px">
-    <div class="card-title">The 6-Phase Lifecycle</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px">
-      ${[
-        { p: 'P0', name: 'Intake & Triage', desc: 'Customer inquiry arrives. Situation assessment, product decomposition, initial risk flag. Creates the Mission JSON.' },
-        { p: 'P1', name: 'Assess & Classify', desc: 'Export control classification (EKN), destination risk, consignee vetting, EUC generation, timeline backward chain.' },
-        { p: 'P2', name: 'License & Document', desc: 'SECO license application (if needed), CI, packing list, COO, EUR.1 — all cross-checked against Mission JSON.' },
-        { p: 'P3', name: 'Pack & Ship', desc: 'DG classification, packing, labeling, carrier coordination, crate labels, insurance, freight booking.' },
-        { p: 'P4', name: 'Operate In-Country', desc: 'Import clearance, in-country operations support, temporary import tracking, customer site coordination.' },
-        { p: 'P5', name: 'Return & Re-import', desc: 'Carnet return, re-import documentation, equipment reconciliation, customs discharge.' },
-        { p: 'P6', name: 'Close & Report', desc: 'Mission archive, lessons learned, case database entry, compliance report, audit trail.' },
-      ].map(ph => `<div style="background:var(--bg);border-radius:8px;padding:14px">
-        <div style="font-weight:800;color:var(--blue);font-size:13px;margin-bottom:4px">${ph.p} — ${ph.name}</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.6">${ph.desc}</div>
-      </div>`).join('')}
+  const modal = document.createElement('div');
+  modal.id = 'help-modal';
+  modal.className = 'modal-backdrop';
+  modal.onclick = function (event) {
+    if (event.target === modal) toggleHelp();
+  };
+  modal.innerHTML = `<div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:18px">Dashboard Help</h3>
+      <button class="tab" onclick="toggleHelp()">Close</button>
+    </div>
+    <div class="hint" style="line-height:1.7">
+      <p>This dashboard uses four tabs: Active Missions, Development, Activity, and Metrics.</p>
+      <p><strong>Plugin Coverage</strong> indicates theoretical capability only (not production readiness).</p>
+      <p>When acting as Tim, the dashboard filters to Tim + Both ownership and defaults to Development with a My Tasks table.</p>
+      <p>Use tab URLs like <code>?tab=missions</code>, <code>?tab=dev</code>, <code>?tab=activity</code>, <code>?tab=metrics</code> for deep links.</p>
+      <p>Writes are currently disabled in this UI due to read-only anon access; use Cowork sessions for updates.</p>
     </div>
   </div>`;
-
-  // --- Shape Up glossary ---
-  html += `<div class="grid-2" style="margin-bottom:20px">
-    <div class="card">
-      <div class="card-title">Shape Up Glossary</div>
-      <div style="font-size:13px;line-height:1.8;color:var(--muted)">
-        <div><strong style="color:var(--text)">Bet</strong> — A time-boxed work package with fixed appetite (weeks). If it can't ship in the appetite, it gets re-scoped, not extended.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Scope</strong> — A slice of work within a bet. Each scope is independently shippable and tracked on the hill chart.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Hill Chart</strong> — Left side = "figuring it out" (unknowns remain). Right side = "executing" (known work, just doing it). A dot at 50% means you've crested the hill — no more unknowns.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Appetite</strong> — How much time we're willing to spend, not an estimate of how long it takes. Hard ceiling.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Milestone</strong> — Revenue unlock point. Milestones are reached when specific bets complete and the system can handle real paid work.</div>
-        <div style="margin-top:8px"><strong style="color:var(--orange)">Tim's Input Needed</strong> — Bet is gated on Tim documenting operational logic (routing rules, carrier selection, authority workflows) in the Tim Input Worksheet.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">How to Use This Dashboard</div>
-      <div style="font-size:13px;line-height:1.8;color:var(--muted)">
-        <div><strong style="color:var(--text)">Select your actor</strong> — Click Pavel or Tim in the top-right. All changes are logged under your name.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Move hill chart dots</strong> — Go to Bets tab, select a bet, drag the slider for any scope. Left = still figuring out, right = executing.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Mark scopes done</strong> — Click the "Done" button next to a scope. This sets it to 100% and marks it green.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Update bet/milestone status</strong> — Use the dropdown selectors to change status (Not Started → In Progress → Done).</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Check phase coverage</strong> — Overview tab shows which phases have plugin coverage and which have gaps.</div>
-        <div style="margin-top:8px"><strong style="color:var(--text)">Review activity</strong> — Activity tab shows all recent changes with who made them and when.</div>
-      </div>
-    </div>
-  </div>`;
-
-  // --- Key Documents ---
-  html += `<div class="card" style="margin-bottom:20px">
-    <div class="card-title">Key Documents</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
-      ${[
-        { title: 'Agent Functional Spec v3.1', desc: 'How the agent enables customer progress — 3 modes (Rescue, Diagnosis, Evaluation), intake paths, response templates. Latest Re-Wired Group review.', icon: '🤖', url: 'https://docs.google.com/document/d/1RfnE6O7K1CFHrbxb7zNNpVu24qVjz94YYJInkYhr0dk/edit', status: 'live' },
-        { title: 'JTBD Research', desc: 'Jobs-to-be-done findings: two customer segments (expert vs scared), four forces analysis, redesign prompts.', icon: '🔬', url: 'https://docs.google.com/document/d/1focVcF244GT_E_z2El4BZW0Wo_ppOqsN_m4sZGEu1ok/edit', status: 'live' },
-        { title: 'Mission Intake Questionnaires', desc: 'Structured intake forms for Demo, Sales, and Service missions. Collects all info before committing to timeline/price.', icon: '📋', url: 'https://docs.google.com/document/d/1bcaQwYeJiZoWmFq_qzd_FIuJPJRi1lTxdzsezE_1wl4/edit', status: 'live' },
-        { title: 'Mission Log Template', desc: 'Captures decision points, friction signals, and near-failures in real time to build battle-tested playbooks.', icon: '📝', url: 'https://docs.google.com/document/d/1c_s5DRyOWANNFn5A8WcJ_MfojUvVIq2v17jNZpisXZo/edit', status: 'live' },
-        { title: 'Competitive Landscape', desc: 'Market analysis: no competitor covers the full workflow. Five white spaces identified. EU AI Act moat.', icon: '🗺️', url: 'https://drive.google.com/file/d/1vhTufpYKry6rdk8gVspGVq6yomMLQ5wr/view', status: 'live' },
-        { title: 'Master Plan (Shape Up)', desc: 'Shape Up plan with all 5 bets, scopes, milestones, revenue unlock points, and dependencies.', icon: '📊', url: 'https://drive.google.com/file/d/1WnI3Xyb5pzb5KHU4wDvWuozNYb1G5VdM/view', status: 'live' },
-        { title: 'Pitch Deck', desc: 'FlowSpex investor/partner pitch deck — mission control positioning, market sizing, revenue model.', icon: '🎯', url: 'https://drive.google.com/file/d/1GucgwZTzzTTr9WvBSWb8FqHQ4e9D2hwN/view', status: 'live' },
-        { title: 'Pricing Model', desc: 'Pilot pricing: EUR 2,900 one-time + EUR 290/mo for 6 months (first 2-3 clients).', icon: '💰', url: 'https://drive.google.com/file/d/1w7gs8yuA4XxaG8ThCUZO0Wjcu-vT1sPn/view', status: 'live' },
-      ].map(doc => `<a href="${doc.url || '#'}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:var(--bg);border-radius:8px;padding:14px;display:flex;gap:12px;align-items:flex-start;cursor:${doc.url ? 'pointer' : 'default'};border:1px solid ${doc.url ? 'transparent' : 'var(--border)'};transition:border-color 0.2s,box-shadow 0.2s"
-        ${doc.url ? 'onmouseover="this.style.borderColor=\'var(--blue)\';this.style.boxShadow=\'0 2px 8px rgba(59,130,246,0.15)\'" onmouseout="this.style.borderColor=\'transparent\';this.style.boxShadow=\'none\'"' : ''}>
-        <span style="font-size:24px">${doc.icon}</span>
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px">
-            ${doc.title}
-            <span style="font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;${doc.status === 'live' ? 'background:rgba(34,197,94,0.15);color:var(--green)' : 'background:rgba(234,179,8,0.15);color:var(--yellow)'}">${doc.status === 'live' ? 'On Drive' : 'To Create'}</span>
-          </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">${doc.desc}</div>
-          ${doc.url ? '<div style="font-size:11px;color:var(--blue);margin-top:6px">Click to open in Google Drive ↗</div>' : '<div style="font-size:11px;color:var(--dim);margin-top:6px">Not yet created</div>'}
-        </div>
-      </a>`).join('')}
-    </div>
-    <p style="font-size:12px;color:var(--dim);margin-top:16px">
-      Mission Control Engine: <a href="https://drive.google.com/drive/folders/1yaRikIq1R-3FtpFuq_CeUBW4IYfbbwXs" target="_blank" rel="noopener" style="color:var(--blue)">Google Drive folder ↗</a>
-      &nbsp;|&nbsp; Shared with Tim: <a href="https://drive.google.com/drive/folders/1lJGNWlU-z6-RBPFB3R2GGCO1vWxmh_aM" target="_blank" rel="noopener" style="color:var(--blue)">FLOWSPEX_SHARED_TIM ↗</a>
-    </p>
-  </div>`;
-
-  // --- Revenue Roadmap ---
-  html += `<div class="card">
-    <div class="card-title">Revenue Roadmap</div>
-    <div style="display:flex;gap:0;align-items:stretch">
-      ${[
-        { ms: 'M1', label: 'Foundation', rev: '—', color: 'var(--dim)', bets: '1, 2' },
-        { ms: 'M2', label: 'First Paid', rev: '€500–2k/assessment', color: 'var(--yellow)', bets: '1, 2, 3' },
-        { ms: 'M3', label: 'Full Docs', rev: '€3–15k/mission', color: 'var(--green)', bets: '4' },
-        { ms: 'M4', label: 'Full Lifecycle', rev: '€1.5–5k/mo retainer', color: 'var(--green)', bets: '5' },
-        { ms: 'M5', label: 'Product', rev: 'Scalable SaaS', color: 'var(--blue)', bets: 'all' },
-      ].map((m, i) => `<div style="flex:1;text-align:center;padding:16px 8px;position:relative;${i < 4 ? 'border-right:1px solid var(--border);' : ''}">
-        <div style="font-weight:800;font-size:16px;color:${m.color}">${m.ms}</div>
-        <div style="font-size:12px;font-weight:700;margin-top:4px">${m.label}</div>
-        <div style="font-size:11px;color:${m.color};margin-top:6px;font-weight:600">${m.rev}</div>
-        <div style="font-size:10px;color:var(--dim);margin-top:6px">Bets ${m.bets}</div>
-      </div>`).join('')}
-    </div>
-  </div>`;
-
-  el.innerHTML = html;
+  document.body.appendChild(modal);
 }
 
-// --- Init ---
-loadAll().then(() => {
-  startAutoRefresh();
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && LIVE_REFRESH_VIEWS.has(currentView)) refreshLiveData();
-  });
-});
+hydrateFromCache();
+render();
+loadAll();
+setInterval(loadAll, 45000);
 </script>
 </div><!-- /app-wrapper -->
 </body>
