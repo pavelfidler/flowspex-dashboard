@@ -201,6 +201,36 @@
   .actor-btn { padding: 4px 12px; border-radius: 6px; border: 2px solid var(--border); background: transparent; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; }
   .actor-btn.active { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
 
+  /* Timeline tab */
+  .timeline-section { margin-bottom: 24px; }
+  .timeline-section-title { font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+
+  .bet-timeline { margin-bottom: 16px; }
+  .bet-timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .bet-timeline-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .bet-timeline-dates { font-size: 11px; color: var(--dim); }
+  .bet-timeline-bar-bg { height: 28px; background: var(--bg); border-radius: 6px; position: relative; overflow: hidden; }
+  .bet-timeline-fill { height: 100%; border-radius: 6px; transition: width 0.3s; position: absolute; left: 0; top: 0; }
+  .bet-timeline-now { position: absolute; top: 0; bottom: 0; width: 2px; background: white; opacity: 0.6; z-index: 2; }
+  .bet-timeline-label { position: absolute; top: 50%; transform: translateY(-50%); left: 10px; font-size: 11px; font-weight: 700; color: white; z-index: 3; white-space: nowrap; }
+  .bet-timeline-pct { position: absolute; top: 50%; transform: translateY(-50%); right: 10px; font-size: 11px; font-weight: 600; color: var(--muted); z-index: 3; }
+  .bet-timeline-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+
+  .velocity-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
+  .velocity-week { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+  .velocity-bars { display: flex; gap: 2px; align-items: flex-end; height: 80px; }
+  .velocity-bar { width: 16px; border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.3s; position: relative; }
+  .velocity-bar-count { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .velocity-label { font-size: 10px; color: var(--dim); white-space: nowrap; }
+
+  .sparkline-container { display: inline-flex; align-items: flex-end; gap: 3px; width: 60px; height: 20px; }
+  .sparkline-dot { width: 8px; border-radius: 2px; background: var(--blue); min-height: 2px; transition: height 0.2s; }
+
+  .hill-sparkline-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; font-size: 12px; border-radius: 6px; margin-bottom: 4px; }
+  .hill-sparkline-row:hover { background: var(--bg); }
+  .hill-sparkline-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hill-sparkline-value { font-size: 11px; color: var(--dim); width: 36px; text-align: right; }
+
   @media (max-width: 900px) {
     .grid-2 { grid-template-columns: 1fr; }
     .grid-5 { grid-template-columns: repeat(2, 1fr); }
@@ -300,7 +330,7 @@ const PLUGINS_STATIC = [
   { name: 'Shipping Transport', phases: [2,3] },
 ];
 
-let state = { bets: [], scopes: [], phases: [], milestones: [], decisions: [], activity: [], tasks: [] };
+let state = { bets: [], scopes: [], phases: [], milestones: [], decisions: [], activity: [], tasks: [], hillSnapshots: [] };
 let currentView = 'overview';
 let selectedBet = null;
 let expandedPhase = null;
@@ -309,14 +339,15 @@ let currentActor = 'Pavel';
 
 // --- Data loading ---
 async function loadAll() {
-  const [bets, scopes, phases, milestones, decisions, activity, tasks] = await Promise.all([
+  const [bets, scopes, phases, milestones, decisions, activity, tasks, hillSnapshots] = await Promise.all([
     sb.from('flowspex_bets').select('*').order('id'),
     sb.from('flowspex_scopes').select('*').order('id'),
     sb.from('flowspex_phases').select('*').order('id'),
     sb.from('flowspex_milestones').select('*').order('id'),
     sb.from('flowspex_decisions').select('*').order('id', { ascending: false }),
-    sb.from('flowspex_activity').select('*').order('created_at', { ascending: false }).limit(20),
+    sb.from('flowspex_activity').select('*').order('created_at', { ascending: false }).limit(50),
     sb.from('flowspex_tasks').select('*').order('priority'),
+    sb.from('flowspex_hill_snapshots').select('*').order('snapshot_date'),
   ]);
   state.bets = bets.data || [];
   state.scopes = scopes.data || [];
@@ -325,6 +356,7 @@ async function loadAll() {
   state.decisions = decisions.data || [];
   state.activity = activity.data || [];
   state.tasks = tasks.data || [];
+  state.hillSnapshots = hillSnapshots.data || [];
   render();
 }
 
@@ -343,6 +375,13 @@ async function updateScopeHill(scopeId, newHill) {
   await sb.from('flowspex_scopes').update({ hill_position: newHill }).eq('id', scopeId);
   const scope = state.scopes.find(s => s.id === scopeId);
   if (scope) { scope.hill_position = newHill; render(); }
+  // Snapshot hill position for sparkline history (one per scope per day)
+  const today = new Date().toISOString().split('T')[0];
+  await sb.from('flowspex_hill_snapshots').upsert({
+    scope_id: scopeId,
+    hill_position: newHill,
+    snapshot_date: today
+  }, { onConflict: 'scope_id,snapshot_date' });
   await logActivity('moved hill', 'scope', scopeId, { hill_position: newHill });
   showSaved();
 }
@@ -460,7 +499,7 @@ function setView(v) { currentView = v; selectedBet = null; expandedPhase = null;
 function render() {
   // Tabs
   const tabsEl = document.getElementById('tabs');
-  tabsEl.innerHTML = ['overview','bets','plugins','activity','docs'].map(v => {
+  tabsEl.innerHTML = ['overview','timeline','bets','plugins','activity','docs'].map(v => {
     const label = v === 'docs' ? 'Docs' : v.charAt(0).toUpperCase()+v.slice(1);
     return `<button class="tab ${currentView===v?'active':''}" onclick="setView('${v}')">${label}</button>`;
   }).join('');
@@ -469,6 +508,7 @@ function render() {
 
   const content = document.getElementById('content');
   if (currentView === 'overview') renderOverview(content);
+  else if (currentView === 'timeline') renderTimeline(content);
   else if (currentView === 'bets') renderBets(content);
   else if (currentView === 'plugins') renderPlugins(content);
   else if (currentView === 'activity') renderActivity(content);
@@ -788,6 +828,213 @@ function renderActivity(el) {
     </div>`;
   });
   html += '</div></div>';
+
+  el.innerHTML = html;
+}
+
+function renderTimeline(el) {
+  const now = new Date();
+  let html = '';
+
+  // === SECTION 1: Bet Timeline Bars ===
+  html += '<div class="card timeline-section"><div class="card-title">Bet Timelines</div>';
+
+  state.bets.forEach(bet => {
+    // Parse appetite weeks from string like "6 weeks"
+    const appetiteMatch = bet.appetite ? bet.appetite.match(/(\d+)/) : null;
+    const appetiteWeeks = appetiteMatch ? parseInt(appetiteMatch[1]) : 0;
+    const appetiteDays = appetiteWeeks * 7;
+
+    const started = bet.started_at ? new Date(bet.started_at) : null;
+    const completed = bet.completed_at ? new Date(bet.completed_at) : null;
+    const deadline = started ? new Date(started.getTime() + appetiteDays * 86400000) : null;
+
+    let fillPct = 0;
+    let colorClass = 'var(--dim)';
+    let statusText = 'Not started';
+    let barColor = 'var(--surface2)';
+
+    if (bet.status === 'done' && completed) {
+      fillPct = 100;
+      barColor = 'var(--green)';
+      statusText = 'Completed ' + completed.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' });
+    } else if (started && deadline) {
+      const totalDuration = deadline.getTime() - started.getTime();
+      const elapsed = now.getTime() - started.getTime();
+      fillPct = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
+
+      if (fillPct < 60) { barColor = 'var(--green)'; }
+      else if (fillPct < 85) { barColor = 'var(--orange)'; }
+      else { barColor = 'var(--red)'; }
+
+      const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / 86400000);
+      statusText = daysLeft > 0 ? daysLeft + 'd remaining' : Math.abs(daysLeft) + 'd overdue';
+    }
+
+    const startLabel = started ? started.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' }) : '—';
+    const deadlineLabel = deadline ? deadline.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' }) : '—';
+    const nowPct = (started && deadline) ? Math.max(0, Math.min(100, ((now.getTime() - started.getTime()) / (deadline.getTime() - started.getTime())) * 100)) : 0;
+
+    html += `<div class="bet-timeline">
+      <div class="bet-timeline-header">
+        <div>
+          <span class="bet-timeline-name" style="color:var(--blue)">Bet ${bet.id}:</span>
+          <span class="bet-timeline-name">${bet.name}</span>
+        </div>
+        <div class="bet-timeline-dates">
+          ${started ? startLabel + ' → ' + deadlineLabel + ' (' + appetiteWeeks + 'w)' : appetiteWeeks + ' weeks appetite'}
+        </div>
+      </div>
+      <div class="bet-timeline-bar-bg">
+        <div class="bet-timeline-fill" style="width:${fillPct}%;background:${barColor}"></div>
+        ${started && bet.status !== 'done' ? `<div class="bet-timeline-now" style="left:${nowPct}%"></div>` : ''}
+        <div class="bet-timeline-label">${bet.status === 'done' ? '✓ ' : ''}${statusText}</div>
+        ${fillPct > 0 && fillPct < 100 ? `<div class="bet-timeline-pct">${Math.round(fillPct)}%</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // === SECTION 2: Weekly Velocity Chart ===
+  html += '<div class="card timeline-section"><div class="card-title">Weekly Velocity</div>';
+
+  // Build velocity data from activity log (last 8 weeks)
+  const eightWeeksAgo = new Date(now.getTime() - 8 * 7 * 86400000);
+  const weekBuckets = {};
+  // Initialize 8 week slots
+  for (let i = 7; i >= 0; i--) {
+    const weekStart = new Date(now.getTime() - i * 7 * 86400000);
+    // Snap to Monday
+    const day = weekStart.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    weekStart.setDate(weekStart.getDate() + mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+    const key = weekStart.toISOString().split('T')[0];
+    if (!weekBuckets[key]) weekBuckets[key] = { completed: 0, started: 0 };
+  }
+
+  // Fill from activity data
+  (state.activity || []).forEach(a => {
+    if (!a.created_at) return;
+    const d = new Date(a.created_at);
+    if (d < eightWeeksAgo) return;
+    const day = d.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    const monday = new Date(d);
+    monday.setDate(monday.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+    const key = monday.toISOString().split('T')[0];
+    if (!weekBuckets[key]) weekBuckets[key] = { completed: 0, started: 0 };
+    if (a.action && a.action.includes('done')) weekBuckets[key].completed++;
+    if (a.action && a.action.includes('in_progress')) weekBuckets[key].started++;
+  });
+
+  const weeks = Object.entries(weekBuckets).sort((a, b) => a[0].localeCompare(b[0]));
+  const maxVal = Math.max(1, ...weeks.map(([, v]) => Math.max(v.completed, v.started)));
+
+  if (weeks.length === 0) {
+    html += '<div style="color:var(--dim);font-size:13px;padding:12px 0">No activity data yet.</div>';
+  } else {
+    html += '<div class="velocity-chart">';
+    weeks.forEach(([weekKey, v]) => {
+      const weekDate = new Date(weekKey);
+      const label = weekDate.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' });
+      const completedH = Math.max(2, (v.completed / maxVal) * 70);
+      const startedH = Math.max(2, (v.started / maxVal) * 70);
+
+      html += `<div class="velocity-week">
+        <div class="velocity-bars">
+          <div class="velocity-bar" style="height:${completedH}px;background:var(--green)" title="${v.completed} completed">
+            ${v.completed > 0 ? `<span class="velocity-bar-count" style="color:var(--green)">${v.completed}</span>` : ''}
+          </div>
+          <div class="velocity-bar" style="height:${startedH}px;background:var(--blue)" title="${v.started} started">
+            ${v.started > 0 ? `<span class="velocity-bar-count" style="color:var(--blue)">${v.started}</span>` : ''}
+          </div>
+        </div>
+        <div class="velocity-label">${label}</div>
+      </div>`;
+    });
+    html += '</div>';
+    html += '<div style="display:flex;gap:16px;margin-top:12px;font-size:11px;color:var(--muted)">';
+    html += '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--green)"></span> Completed</span>';
+    html += '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--blue)"></span> Started</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // === SECTION 3: Hill Movement Sparklines ===
+  html += '<div class="card timeline-section"><div class="card-title">Hill Movement (Last 4 Weeks)</div>';
+
+  const snapshots = state.hillSnapshots || [];
+  const fourWeeksAgo = new Date(now.getTime() - 28 * 86400000).toISOString().split('T')[0];
+
+  // Group by bet
+  state.bets.forEach(bet => {
+    const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
+    if (betScopes.length === 0) return;
+
+    html += `<div style="margin-bottom:16px">`;
+    html += `<div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Bet ${bet.id}: ${bet.name}</div>`;
+
+    betScopes.forEach((scope, i) => {
+      const scopeSnaps = snapshots
+        .filter(s => s.scope_id === scope.id && s.snapshot_date >= fourWeeksAgo)
+        .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date));
+
+      // Build 4 weekly data points (most recent snapshot per week)
+      const weeklyPoints = [];
+      for (let w = 3; w >= 0; w--) {
+        const weekEnd = new Date(now.getTime() - w * 7 * 86400000);
+        const weekStart = new Date(weekEnd.getTime() - 7 * 86400000);
+        const weekEndStr = weekEnd.toISOString().split('T')[0];
+        const weekStartStr = weekStart.toISOString().split('T')[0];
+        const inWeek = scopeSnaps.filter(s => s.snapshot_date >= weekStartStr && s.snapshot_date <= weekEndStr);
+        if (inWeek.length > 0) {
+          weeklyPoints.push(inWeek[inWeek.length - 1].hill_position);
+        } else if (w === 0) {
+          // Current week: use live hill_position
+          weeklyPoints.push(scope.hill_position);
+        } else {
+          weeklyPoints.push(null);
+        }
+      }
+
+      const c = scope.status === 'done' ? 'var(--green)' : SCOPE_COLORS[i % SCOPE_COLORS.length];
+      const hasData = weeklyPoints.some(p => p !== null);
+
+      html += `<div class="hill-sparkline-row">
+        <div class="scope-dot" style="background:${c}"></div>
+        <div class="hill-sparkline-name">${scope.name}</div>
+        <div class="sparkline-container">`;
+
+      if (hasData) {
+        weeklyPoints.forEach(p => {
+          if (p !== null) {
+            const h = Math.max(2, (p / 100) * 18);
+            html += `<div class="sparkline-dot" style="height:${h}px;background:${c}" title="${p}%"></div>`;
+          } else {
+            html += `<div class="sparkline-dot" style="height:2px;background:var(--border)"></div>`;
+          }
+        });
+      } else {
+        // No snapshot data — show flat dots at current position
+        for (let d = 0; d < 4; d++) {
+          const h = Math.max(2, (scope.hill_position / 100) * 18);
+          const opacity = d < 3 ? '0.3' : '1';
+          html += `<div class="sparkline-dot" style="height:${h}px;background:${c};opacity:${opacity}"></div>`;
+        }
+      }
+
+      html += `</div>
+        <div class="hill-sparkline-value">${scope.hill_position}%</div>
+      </div>`;
+    });
+
+    html += '</div>';
+  });
+
+  html += '<div style="font-size:11px;color:var(--dim);margin-top:8px">Sparklines show hill position snapshots per week. Dots fill in as hill positions are updated over time.</div>';
+  html += '</div>';
 
   el.innerHTML = html;
 }
