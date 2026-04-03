@@ -210,6 +210,52 @@
 </head>
 <body>
 
+<!-- Auth Gate -->
+<div id="auth-gate" style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px">
+  <div style="background:var(--surface);border-radius:16px;padding:40px;max-width:380px;width:100%;text-align:center">
+    <div style="font-size:32px;font-weight:800;margin-bottom:4px"><span style="color:var(--blue)">FlowSpex</span> MC</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:28px">Mission Control — restricted access</div>
+    <input id="auth-pw" type="password" placeholder="Password" autofocus
+      style="width:100%;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none;margin-bottom:12px;transition:border-color 0.2s"
+      onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
+      onkeydown="if(event.key==='Enter')authCheck()">
+    <button onclick="authCheck()"
+      style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--blue);color:white;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s"
+      onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Enter</button>
+    <div id="auth-error" style="color:var(--red);font-size:12px;margin-top:12px;display:none">Wrong password</div>
+  </div>
+</div>
+<script>
+async function hashPw(pw) {
+  const enc = new TextEncoder().encode(pw);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// sha256('flowspex2026')
+const VALID_HASH = '73c91afb558690ac50966365cf36c83e4c628e59deeae3db7ea50c838d77b5f6';
+async function authCheck() {
+  const pw = document.getElementById('auth-pw').value;
+  const h = await hashPw(pw);
+  if (h === VALID_HASH) {
+    sessionStorage.setItem('fs-mc-auth', '1');
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = 'block';
+  } else {
+    document.getElementById('auth-error').style.display = 'block';
+    document.getElementById('auth-pw').value = '';
+    document.getElementById('auth-pw').focus();
+  }
+}
+if (sessionStorage.getItem('fs-mc-auth') === '1') {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = 'block';
+  });
+}
+</script>
+
+<div id="app-wrapper" style="display:none">
+
 <div id="save-indicator" class="save-indicator hidden"></div>
 
 <div class="container" id="app">
@@ -864,5 +910,6 @@ function renderDocs(el) {
 // --- Init ---
 loadAll();
 </script>
+</div><!-- /app-wrapper -->
 </body>
 </html>
