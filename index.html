@@ -336,6 +336,8 @@ let selectedBet = null;
 let expandedPhase = null;
 let expandedScopes = new Set();
 let currentActor = 'Pavel';
+let refreshInFlight = false;
+const LIVE_REFRESH_VIEWS = new Set(['overview', 'bets', 'timeline']);
 
 // --- Data loading ---
 async function loadAll() {
@@ -358,6 +360,32 @@ async function loadAll() {
   state.tasks = tasks.data || [];
   state.hillSnapshots = hillSnapshots.data || [];
   render();
+}
+
+async function refreshLiveData() {
+  if (refreshInFlight) return;
+  refreshInFlight = true;
+  try {
+    const [bets, scopes, milestones, tasks] = await Promise.all([
+      sb.from('flowspex_bets').select('*').order('id'),
+      sb.from('flowspex_scopes').select('*').order('id'),
+      sb.from('flowspex_milestones').select('*').order('id'),
+      sb.from('flowspex_tasks').select('*').order('priority'),
+    ]);
+    state.bets = bets.data || state.bets;
+    state.scopes = scopes.data || state.scopes;
+    state.milestones = milestones.data || state.milestones;
+    state.tasks = tasks.data || state.tasks;
+    render();
+  } finally {
+    refreshInFlight = false;
+  }
+}
+
+function startAutoRefresh() {
+  setInterval(() => {
+    if (document.visibilityState === 'visible' && LIVE_REFRESH_VIEWS.has(currentView)) refreshLiveData();
+  }, 30000);
 }
 
 // --- Mutations ---
@@ -461,6 +489,52 @@ function toggleScope(scopeId) {
   render();
 }
 
+function deriveBetStatus(scopes) {
+  if (!scopes.length) return 'not_started';
+  if (scopes.every(s => s.status === 'done')) return 'done';
+  if (scopes.some(s => s.status === 'in_progress' || s.status === 'done')) return 'in_progress';
+  return 'not_started';
+}
+
+function getBetDisplayStatus(bet, scopes) {
+  const derived = deriveBetStatus(scopes);
+  const override = bet.status_override || bet.manual_status || bet.override_status;
+  if (override) return override;
+  // Keep legacy manual status only as explicit pause override.
+  if (bet.status === 'paused') return 'paused';
+  return derived;
+}
+
+function deriveMilestoneStatus(dependencyStatuses) {
+  if (!dependencyStatuses.length) return 'not_started';
+  if (dependencyStatuses.every(s => s === 'done')) return 'done';
+  if (dependencyStatuses.some(s => s === 'in_progress' || s === 'done' || s === 'paused')) return 'in_progress';
+  return 'not_started';
+}
+
+function getMilestoneDisplayStatus(milestone, betStatusById) {
+  const deps = Array.isArray(milestone.bet_ids) ? milestone.bet_ids : [];
+  if (!deps.length) return milestone.status || 'not_started';
+  const depStatuses = deps
+    .map(id => betStatusById.get(id))
+    .filter(Boolean);
+  const derived = deriveMilestoneStatus(depStatuses);
+  const override = milestone.status_override || milestone.manual_status || milestone.override_status;
+  return override || derived;
+}
+
+function isScopeResetAudited(scopeId) {
+  const scopeTasks = state.tasks.filter(t => t.scope_id === scopeId);
+  if (!scopeTasks.length) return false;
+  return scopeTasks.every(t => typeof t.notes === 'string' && t.notes.trim().toUpperCase().startsWith('RESET'));
+}
+
+function getScopeColor(scope, index) {
+  if (scope.status === 'done') return '#22c55e';
+  if (isScopeResetAudited(scope.id)) return '#6b7280';
+  return SCOPE_COLORS[index % SCOPE_COLORS.length];
+}
+
 // --- Hill chart SVG ---
 function hillSVG(scopes, compact) {
   const w = compact ? 260 : 400, h = compact ? 70 : 100;
@@ -480,9 +554,10 @@ function hillSVG(scopes, compact) {
   scopes.forEach((s, i) => {
     const x = (s.hill_position / 100) * w;
     const y = hillY(s.hill_position);
-    const c = s.status === 'done' ? '#22c55e' : SCOPE_COLORS[i % SCOPE_COLORS.length];
+    const c = getScopeColor(s, i);
     const r = compact ? 4 : 6;
-    svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="white" stroke-width="1.5"><title>${s.name}: ${s.hill_position}%</title></circle>`;
+    const auditedSuffix = isScopeResetAudited(s.id) ? ' (audited reset)' : '';
+    svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="white" stroke-width="1.5"><title>${s.name}: ${s.hill_position}%${auditedSuffix}</title></circle>`;
   });
   svg += '</svg>';
   return svg;
@@ -494,7 +569,13 @@ function setActor(a) {
   document.querySelectorAll('.actor-btn').forEach(b => b.classList.toggle('active', b.dataset.actor === a));
 }
 
-function setView(v) { currentView = v; selectedBet = null; expandedPhase = null; render(); }
+function setView(v) {
+  currentView = v;
+  selectedBet = null;
+  expandedPhase = null;
+  render();
+  if (LIVE_REFRESH_VIEWS.has(v)) refreshLiveData();
+}
 
 function render() {
   // Tabs
@@ -517,6 +598,8 @@ function render() {
 
 function renderOverview(el) {
   let html = '<div class="grid-2">';
+  const betScopesById = new Map(state.bets.map(bet => [bet.id, state.scopes.filter(s => s.bet_id === bet.id)]));
+  const betStatusById = new Map(state.bets.map(bet => [bet.id, getBetDisplayStatus(bet, betScopesById.get(bet.id) || [])]));
 
   // Phase coverage
   html += '<div class="card"><div class="card-title">Phase Coverage</div>';
@@ -543,17 +626,16 @@ function renderOverview(el) {
   // Milestones
   html += '<div class="card"><div class="card-title">Milestones & Revenue</div>';
   state.milestones.forEach((m, i) => {
+    const milestoneStatus = getMilestoneDisplayStatus(m, betStatusById);
     html += `<div class="milestone">
       <div class="milestone-dot-col">
-        <div class="milestone-dot ${m.status}">${m.id}</div>
+        <div class="milestone-dot ${milestoneStatus === 'not_started' ? '' : milestoneStatus}">${m.id}</div>
         ${i < state.milestones.length - 1 ? '<div class="milestone-line"></div>' : ''}
       </div>
       <div class="milestone-content">
         <div style="display:flex;align-items:center;gap:8px">
           <div class="milestone-name">${m.name}</div>
-          <select class="status-select" onchange="updateMilestoneStatus('${m.id}',this.value)">
-            ${['future','upcoming','in_progress','done'].map(s=>`<option value="${s}" ${m.status===s?'selected':''}>${STATUS_LABELS[s]||s}</option>`).join('')}
-          </select>
+          <span class="badge ${milestoneStatus}">${STATUS_LABELS[milestoneStatus]||milestoneStatus}</span>
         </div>
         <div class="milestone-criteria">${m.criteria||''}</div>
         ${m.revenue ? `<div class="milestone-revenue">${m.revenue}</div>` : ''}
@@ -566,11 +648,12 @@ function renderOverview(el) {
   // Bet cards
   html += '<div class="grid-5" style="margin-top:20px">';
   state.bets.forEach(bet => {
-    const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
-    html += `<div class="bet-card" onclick="currentView='bets';selectedBet=${bet.id};render()">
+    const betScopes = betScopesById.get(bet.id) || [];
+    const betStatus = betStatusById.get(bet.id) || 'not_started';
+    html += `<div class="bet-card" onclick="setView('bets');selectedBet=${bet.id};render()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <span class="bet-num">#${bet.id}</span>
-        <span class="badge ${bet.status}">${STATUS_LABELS[bet.status]||bet.status}</span>
+        <span class="badge ${betStatus}">${STATUS_LABELS[betStatus]||betStatus}</span>
       </div>
       <div class="bet-name">${bet.name}</div>
       <div class="bet-appetite">${bet.appetite}</div>
@@ -584,6 +667,8 @@ function renderOverview(el) {
 }
 
 function renderBets(el) {
+  const betScopesById = new Map(state.bets.map(bet => [bet.id, state.scopes.filter(s => s.bet_id === bet.id)]));
+  const betStatusById = new Map(state.bets.map(bet => [bet.id, getBetDisplayStatus(bet, betScopesById.get(bet.id) || [])]));
   let html = '<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
   state.bets.forEach(bet => {
     html += `<button class="tab ${selectedBet===bet.id?'active':''}" onclick="selectedBet=selectedBet===${bet.id}?null:${bet.id};expandedScopes.clear();render()">Bet ${bet.id}: ${bet.name}</button>`;
@@ -592,7 +677,8 @@ function renderBets(el) {
 
   if (selectedBet) {
     const bet = state.bets.find(b => b.id === selectedBet);
-    const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
+    const betScopes = betScopesById.get(bet.id) || [];
+    const betStatus = betStatusById.get(bet.id) || 'not_started';
 
     // Header row: bet info + status + appetite
     html += `<div class="card" style="margin-bottom:16px">
@@ -605,7 +691,7 @@ function renderBets(el) {
           <div>
             <div style="font-size:11px;color:var(--dim)">Status</div>
             <select class="status-select" onchange="updateBetStatus(${bet.id},this.value)" style="font-size:13px;font-weight:700">
-              ${['not_started','in_progress','done','paused'].map(s=>`<option value="${s}" ${bet.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
+              ${['not_started','in_progress','done','paused'].map(s=>`<option value="${s}" ${betStatus===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
             </select>
           </div>
           <div style="text-align:center">
@@ -631,7 +717,7 @@ function renderBets(el) {
     html += '<div class="card"><div class="card-title">Scopes & Tasks</div>';
 
     betScopes.forEach((s, i) => {
-      const c = s.status === 'done' ? '#22c55e' : SCOPE_COLORS[i % SCOPE_COLORS.length];
+      const c = getScopeColor(s, i);
       const scopeTasks = state.tasks.filter(t => t.scope_id === s.id);
       const doneTasks = scopeTasks.filter(t => t.status === 'done').length;
       const totalTasks = scopeTasks.length;
@@ -716,7 +802,7 @@ function renderBets(el) {
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:20px;font-weight:800;color:var(--blue)">#${bet.id}</span>
               <span style="font-size:16px;font-weight:700">${bet.name}</span>
-              <span class="badge ${bet.status}">${STATUS_LABELS[bet.status]||bet.status}</span>
+              <span class="badge ${betStatusById.get(bet.id) || 'not_started'}">${STATUS_LABELS[betStatusById.get(bet.id) || 'not_started'] || betStatusById.get(bet.id) || 'not_started'}</span>
             </div>
             <p style="font-size:13px;color:var(--muted);margin-top:4px">${bet.deliverable||''}</p>
           </div>
@@ -742,7 +828,7 @@ function renderBets(el) {
         </div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
           ${betScopes.map((s, i) => {
-            const sc = s.status === 'done' ? '#22c55e' : SCOPE_COLORS[i % SCOPE_COLORS.length];
+            const sc = getScopeColor(s, i);
             const st = state.tasks.filter(t => t.scope_id === s.id);
             const sd = st.filter(t => t.status === 'done').length;
             return `<div style="background:var(--bg);border-radius:6px;padding:6px 10px;font-size:11px;display:flex;align-items:center;gap:6px;border-left:3px solid ${sc}">
@@ -834,12 +920,15 @@ function renderActivity(el) {
 
 function renderTimeline(el) {
   const now = new Date();
+  const betScopesById = new Map(state.bets.map(bet => [bet.id, state.scopes.filter(s => s.bet_id === bet.id)]));
+  const betStatusById = new Map(state.bets.map(bet => [bet.id, getBetDisplayStatus(bet, betScopesById.get(bet.id) || [])]));
   let html = '';
 
   // === SECTION 1: Bet Timeline Bars ===
   html += '<div class="card timeline-section"><div class="card-title">Bet Timelines</div>';
 
   state.bets.forEach(bet => {
+    const betStatus = betStatusById.get(bet.id) || 'not_started';
     // Parse appetite weeks from string like "6 weeks"
     const appetiteMatch = bet.appetite ? bet.appetite.match(/(\d+)/) : null;
     const appetiteWeeks = appetiteMatch ? parseInt(appetiteMatch[1]) : 0;
@@ -854,7 +943,7 @@ function renderTimeline(el) {
     let statusText = 'Not started';
     let barColor = 'var(--surface2)';
 
-    if (bet.status === 'done' && completed) {
+    if (betStatus === 'done' && completed) {
       fillPct = 100;
       barColor = 'var(--green)';
       statusText = 'Completed ' + completed.toLocaleDateString('en-CH', { month: 'short', day: 'numeric' });
@@ -887,8 +976,8 @@ function renderTimeline(el) {
       </div>
       <div class="bet-timeline-bar-bg">
         <div class="bet-timeline-fill" style="width:${fillPct}%;background:${barColor}"></div>
-        ${started && bet.status !== 'done' ? `<div class="bet-timeline-now" style="left:${nowPct}%"></div>` : ''}
-        <div class="bet-timeline-label">${bet.status === 'done' ? '✓ ' : ''}${statusText}</div>
+        ${started && betStatus !== 'done' ? `<div class="bet-timeline-now" style="left:${nowPct}%"></div>` : ''}
+        <div class="bet-timeline-label">${betStatus === 'done' ? '✓ ' : ''}${statusText}</div>
         ${fillPct > 0 && fillPct < 100 ? `<div class="bet-timeline-pct">${Math.round(fillPct)}%</div>` : ''}
       </div>
     </div>`;
@@ -1155,7 +1244,12 @@ function renderDocs(el) {
 }
 
 // --- Init ---
-loadAll();
+loadAll().then(() => {
+  startAutoRefresh();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && LIVE_REFRESH_VIEWS.has(currentView)) refreshLiveData();
+  });
+});
 </script>
 </div><!-- /app-wrapper -->
 </body>
