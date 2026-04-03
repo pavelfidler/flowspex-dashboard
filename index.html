@@ -159,6 +159,43 @@
   .save-indicator.saved { background: #166534; color: #86efac; opacity: 1; }
   .save-indicator.hidden { opacity: 0; }
 
+  /* Task list */
+  .scope-expandable { cursor: pointer; }
+  .scope-expandable:hover { background: var(--bg); }
+  .scope-chevron { font-size: 10px; color: var(--dim); transition: transform 0.15s; width: 16px; text-align: center; flex-shrink: 0; }
+  .scope-chevron.open { transform: rotate(90deg); }
+  .task-list { margin: 0 0 12px 36px; padding: 0; }
+  .task-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; border-left: 2px solid var(--border); margin-bottom: 1px; background: var(--bg); font-size: 12px; transition: border-color 0.15s; }
+  .task-item:hover { border-left-color: var(--blue); }
+  .task-item:first-child { border-radius: 6px 6px 0 0; }
+  .task-item:last-child { border-radius: 0 0 6px 6px; }
+  .task-checkbox { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; }
+  .task-checkbox:hover { border-color: var(--green); }
+  .task-checkbox.done { background: var(--green); border-color: var(--green); color: white; }
+  .task-checkbox.in_progress { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+  .task-checkbox.blocked { background: #451a03; border-color: var(--red); color: var(--red); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-weight: 600; color: var(--text); }
+  .task-name.done { text-decoration: line-through; color: var(--dim); }
+  .task-desc { color: var(--muted); font-size: 11px; margin-top: 2px; line-height: 1.4; }
+  .task-meta { display: flex; gap: 8px; margin-top: 4px; align-items: center; }
+  .task-owner { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+  .task-owner.Pavel { background: var(--blue-dim); color: #93c5fd; }
+  .task-owner.Tim { background: #451a03; color: #fbbf24; }
+  .task-owner.Both { background: #1e1b4b; color: #a78bfa; }
+  .task-status-btn { font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); background: transparent; color: var(--dim); cursor: pointer; font-weight: 600; }
+  .task-status-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .task-notes-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 11px; padding: 4px 8px; margin-top: 4px; resize: none; font-family: inherit; }
+  .task-notes-input:focus { outline: none; border-color: var(--blue); }
+  .scope-progress { display: flex; gap: 3px; margin-left: 8px; }
+  .scope-progress-dot { width: 6px; height: 6px; border-radius: 2px; }
+  .scope-summary { font-size: 11px; color: var(--dim); margin-left: auto; white-space: nowrap; }
+  .add-task-row { display: flex; gap: 8px; padding: 6px 12px; margin: 0 0 12px 36px; }
+  .add-task-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; padding: 6px 10px; font-family: inherit; }
+  .add-task-input:focus { outline: none; border-color: var(--blue); }
+  .add-task-btn { padding: 6px 12px; border-radius: 6px; border: none; background: var(--blue); color: white; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .add-task-btn:hover { background: #2563eb; }
+
   /* Actor picker */
   .actor-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
   .actor-btn { padding: 4px 12px; border-radius: 6px; border: 2px solid var(--border); background: transparent; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -217,21 +254,23 @@ const PLUGINS_STATIC = [
   { name: 'Shipping Transport', phases: [2,3] },
 ];
 
-let state = { bets: [], scopes: [], phases: [], milestones: [], decisions: [], activity: [] };
+let state = { bets: [], scopes: [], phases: [], milestones: [], decisions: [], activity: [], tasks: [] };
 let currentView = 'overview';
 let selectedBet = null;
 let expandedPhase = null;
+let expandedScopes = new Set();
 let currentActor = 'Pavel';
 
 // --- Data loading ---
 async function loadAll() {
-  const [bets, scopes, phases, milestones, decisions, activity] = await Promise.all([
+  const [bets, scopes, phases, milestones, decisions, activity, tasks] = await Promise.all([
     sb.from('flowspex_bets').select('*').order('id'),
     sb.from('flowspex_scopes').select('*').order('id'),
     sb.from('flowspex_phases').select('*').order('id'),
     sb.from('flowspex_milestones').select('*').order('id'),
     sb.from('flowspex_decisions').select('*').order('id', { ascending: false }),
     sb.from('flowspex_activity').select('*').order('created_at', { ascending: false }).limit(20),
+    sb.from('flowspex_tasks').select('*').order('priority'),
   ]);
   state.bets = bets.data || [];
   state.scopes = scopes.data || [];
@@ -239,6 +278,7 @@ async function loadAll() {
   state.milestones = milestones.data || [];
   state.decisions = decisions.data || [];
   state.activity = activity.data || [];
+  state.tasks = tasks.data || [];
   render();
 }
 
@@ -290,6 +330,50 @@ async function updateMilestoneStatus(mId, newStatus) {
   if (m) { Object.assign(m, updates); render(); }
   await logActivity('set milestone status ' + newStatus, 'milestone', mId, {});
   showSaved();
+}
+
+async function cycleTaskStatus(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const cycle = { todo: 'in_progress', in_progress: 'done', done: 'todo', blocked: 'todo' };
+  const newStatus = cycle[task.status] || 'todo';
+  await sb.from('flowspex_tasks').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', taskId);
+  task.status = newStatus;
+  render();
+  await logActivity('task ' + newStatus, 'task', taskId, { name: task.name });
+  showSaved();
+}
+
+async function setTaskStatus(taskId, newStatus) {
+  await sb.from('flowspex_tasks').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', taskId);
+  const task = state.tasks.find(t => t.id === taskId);
+  if (task) { task.status = newStatus; render(); }
+  await logActivity('task ' + newStatus, 'task', taskId, {});
+  showSaved();
+}
+
+async function updateTaskNotes(taskId, notes) {
+  await sb.from('flowspex_tasks').update({ notes, updated_at: new Date().toISOString() }).eq('id', taskId);
+  const task = state.tasks.find(t => t.id === taskId);
+  if (task) task.notes = notes;
+  showSaved();
+}
+
+async function addTask(scopeId) {
+  const input = document.getElementById('new-task-' + scopeId);
+  if (!input || !input.value.trim()) return;
+  const name = input.value.trim();
+  const maxPriority = Math.max(0, ...state.tasks.filter(t => t.scope_id === scopeId).map(t => t.priority));
+  const { data } = await sb.from('flowspex_tasks').insert({ scope_id: scopeId, name, status: 'todo', owner: currentActor, priority: maxPriority + 1 }).select();
+  if (data && data[0]) { state.tasks.push(data[0]); render(); }
+  await logActivity('added task', 'scope', scopeId, { task: name });
+  showSaved();
+}
+
+function toggleScope(scopeId) {
+  if (expandedScopes.has(scopeId)) expandedScopes.delete(scopeId);
+  else expandedScopes.add(scopeId);
+  render();
 }
 
 // --- Hill chart SVG ---
@@ -416,7 +500,7 @@ function renderOverview(el) {
 function renderBets(el) {
   let html = '<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
   state.bets.forEach(bet => {
-    html += `<button class="tab ${selectedBet===bet.id?'active':''}" onclick="selectedBet=selectedBet===${bet.id}?null:${bet.id};render()">Bet ${bet.id}: ${bet.name}</button>`;
+    html += `<button class="tab ${selectedBet===bet.id?'active':''}" onclick="selectedBet=selectedBet===${bet.id}?null:${bet.id};expandedScopes.clear();render()">Bet ${bet.id}: ${bet.name}</button>`;
   });
   html += '</div>';
 
@@ -424,36 +508,65 @@ function renderBets(el) {
     const bet = state.bets.find(b => b.id === selectedBet);
     const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
 
-    html += '<div class="card"><div class="bet-detail">';
-
-    // Left: hill chart + scopes
-    html += '<div>';
-    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-      <div>
-        <h2><span>Bet ${bet.id}:</span> ${bet.name}</h2>
-        <p class="deliverable">${bet.deliverable||''}</p>
+    // Header row: bet info + status + appetite
+    html += `<div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+        <div style="flex:1;min-width:300px">
+          <h2 style="font-size:22px;font-weight:800;margin-bottom:4px"><span style="color:var(--blue)">Bet ${bet.id}:</span> ${bet.name}</h2>
+          <p style="color:var(--muted);font-size:14px">${bet.deliverable||''}</p>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center">
+          <div>
+            <div style="font-size:11px;color:var(--dim)">Status</div>
+            <select class="status-select" onchange="updateBetStatus(${bet.id},this.value)" style="font-size:13px;font-weight:700">
+              ${['not_started','in_progress','done','paused'].map(s=>`<option value="${s}" ${bet.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
+            </select>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:var(--dim)">Appetite</div>
+            <div style="font-size:18px;font-weight:800;color:var(--orange)">${bet.appetite}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:var(--dim)">Priority</div>
+            <div style="font-size:18px;font-weight:800;color:var(--blue)">${bet.priority}</div>
+          </div>
+        </div>
       </div>
-      <div class="appetite-display">
-        <div class="appetite-label">Appetite</div>
-        <div class="appetite-value">${bet.appetite}</div>
-      </div>
+      ${bet.tim_needed ? `<div class="tim-gate" style="margin-top:12px"><div class="tim-title">Tim's Input Required</div><div class="tim-desc">This bet is gated on Tim documenting operational logic in the Tim Input Worksheet.</div></div>` : ''}
     </div>`;
 
-    html += `<div class="card-title">Hill Chart</div>`;
-    html += `<div class="hill-container">${hillSVG(betScopes, false)}</div>`;
+    // Hill chart card
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="card-title">Hill Chart</div>
+      <div class="hill-container">${hillSVG(betScopes, false)}</div>
+    </div>`;
 
-    html += '<div style="margin-top:16px">';
+    // Scope list with expandable tasks
+    html += '<div class="card"><div class="card-title">Scopes & Tasks</div>';
+
     betScopes.forEach((s, i) => {
       const c = s.status === 'done' ? '#22c55e' : SCOPE_COLORS[i % SCOPE_COLORS.length];
-      const hillLabel = s.status === 'done' ? 'Done' : s.hill_position >= 50 ? 'Downhill' : 'Uphill';
+      const scopeTasks = state.tasks.filter(t => t.scope_id === s.id);
+      const doneTasks = scopeTasks.filter(t => t.status === 'done').length;
+      const totalTasks = scopeTasks.length;
+      const isExpanded = expandedScopes.has(s.id);
       const hillClass = s.status === 'done' ? 'done' : s.hill_position >= 50 ? 'downhill' : 'uphill';
-      html += `<div class="scope-row">
+
+      // Scope header row (clickable to expand)
+      html += `<div class="scope-row scope-expandable" onclick="toggleScope(${s.id})">
+        <span class="scope-chevron ${isExpanded?'open':''}">&#9654;</span>
         <div class="scope-dot" style="background:${c}"></div>
-        <div>
+        <div style="flex:1;min-width:0">
           <span class="scope-name">${s.name}</span>
-          <span class="scope-note">${s.note||''}</span>
+          <div class="scope-progress">
+            ${scopeTasks.map(t => {
+              const tc = t.status === 'done' ? 'var(--green)' : t.status === 'in_progress' ? 'var(--blue)' : t.status === 'blocked' ? 'var(--red)' : 'var(--border)';
+              return `<div class="scope-progress-dot" style="background:${tc}" title="${t.name}: ${t.status}"></div>`;
+            }).join('')}
+          </div>
         </div>
-        <div class="scope-editor">
+        <span class="scope-summary">${doneTasks}/${totalTasks} tasks</span>
+        <div class="scope-editor" onclick="event.stopPropagation()">
           <input type="range" class="scope-slider" min="0" max="100" value="${s.hill_position}"
             onchange="updateScopeHill(${s.id},parseInt(this.value))" ${s.status==='done'?'disabled':''}>
           <span class="scope-hill-label ${hillClass}">${s.hill_position}%</span>
@@ -463,40 +576,98 @@ function renderBets(el) {
           </button>
         </div>
       </div>`;
+
+      // Expanded task list
+      if (isExpanded) {
+        html += '<div class="task-list">';
+        scopeTasks.forEach(t => {
+          const checkClass = t.status;
+          const checkIcon = t.status === 'done' ? '&#10003;' : t.status === 'in_progress' ? '&#9654;' : t.status === 'blocked' ? '!' : '';
+          html += `<div class="task-item">
+            <div class="task-checkbox ${checkClass}" onclick="cycleTaskStatus(${t.id})" title="Click to cycle: todo → in progress → done">${checkIcon}</div>
+            <div class="task-body">
+              <div class="task-name ${t.status==='done'?'done':''}">${t.name}</div>
+              ${t.description ? `<div class="task-desc">${t.description}</div>` : ''}
+              <div class="task-meta">
+                ${t.owner ? `<span class="task-owner ${t.owner}">${t.owner}</span>` : ''}
+                <button class="task-status-btn" onclick="setTaskStatus(${t.id},'blocked')" ${t.status==='blocked'?'style="border-color:var(--red);color:var(--red)"':''}>
+                  ${t.status==='blocked'?'Unblock':'Block'}
+                </button>
+              </div>
+              ${t.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;padding:4px 8px;background:var(--surface);border-radius:4px">${t.notes}</div>` : ''}
+              <textarea class="task-notes-input" placeholder="Add notes..." rows="1"
+                onfocus="this.rows=2" onblur="this.rows=1;updateTaskNotes(${t.id},this.value)">${t.notes||''}</textarea>
+            </div>
+          </div>`;
+        });
+        html += '</div>';
+
+        // Add task input
+        html += `<div class="add-task-row">
+          <input type="text" class="add-task-input" id="new-task-${s.id}" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addTask(${s.id})">
+          <button class="add-task-btn" onclick="addTask(${s.id})">Add</button>
+        </div>`;
+      }
     });
-    html += '</div></div>';
 
-    // Right: metadata
-    html += '<div>';
-    html += `<div class="meta-card"><div class="meta-label">Status</div>
-      <select class="status-select" onchange="updateBetStatus(${bet.id},this.value)" style="font-size:14px;font-weight:700">
-        ${['not_started','in_progress','done','paused'].map(s=>`<option value="${s}" ${bet.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
-      </select>
-    </div>`;
-    html += `<div class="meta-card"><div class="meta-label">Priority</div><div class="meta-value" style="color:var(--blue)">${bet.priority}</div></div>`;
-    html += `<div class="meta-card"><div class="meta-label">Depends on</div><div class="meta-value">${bet.depends_on||'Nothing'}</div></div>`;
+    html += '</div>';
 
-    if (bet.tim_needed) {
-      html += `<div class="tim-gate"><div class="tim-title">Tim's Input Required</div><div class="tim-desc">This bet is gated on Tim documenting operational logic in the Tim Input Worksheet.</div></div>`;
-    }
-
-    // Phase coverage for this bet
-    const betPhases = state.phases.filter(p => p.bet_id === bet.id);
-    if (betPhases.length) {
-      html += '<div class="meta-card" style="margin-top:12px"><div class="meta-label" style="margin-bottom:8px">Phases covered</div>';
-      betPhases.forEach(p => {
-        const color = p.coverage >= 70 ? 'var(--green)' : p.coverage >= 30 ? 'var(--yellow)' : 'var(--red)';
-        html += `<div class="phase-row">
-          <div class="phase-label">P${p.id}</div>
-          <div class="phase-bar-bg"><div class="phase-bar-fill" style="width:${p.coverage}%;background:${color}"></div>
-          <span class="phase-bar-text">${p.name}</span><span class="phase-bar-pct">${p.coverage}%</span></div></div>`;
-      });
-      html += '</div>';
-    }
-
-    html += '</div></div></div>';
   } else {
-    html += '<div class="card" style="padding:40px;text-align:center;color:var(--dim)">Select a bet above to see its hill chart and details</div>';
+    // No bet selected — show overview cards for all bets
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:16px">';
+    state.bets.forEach(bet => {
+      const betScopes = state.scopes.filter(s => s.bet_id === bet.id);
+      const allTasks = state.tasks.filter(t => betScopes.some(s => s.id === t.scope_id));
+      const doneTasks = allTasks.filter(t => t.status === 'done').length;
+      const inProgressTasks = allTasks.filter(t => t.status === 'in_progress').length;
+      const blockedTasks = allTasks.filter(t => t.status === 'blocked').length;
+      const totalTasks = allTasks.length;
+      const pctDone = totalTasks > 0 ? Math.round(doneTasks / totalTasks * 100) : 0;
+
+      html += `<div class="card" style="cursor:pointer" onclick="selectedBet=${bet.id};render()">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px;font-weight:800;color:var(--blue)">#${bet.id}</span>
+              <span style="font-size:16px;font-weight:700">${bet.name}</span>
+              <span class="badge ${bet.status}">${STATUS_LABELS[bet.status]||bet.status}</span>
+            </div>
+            <p style="font-size:13px;color:var(--muted);margin-top:4px">${bet.deliverable||''}</p>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:18px;font-weight:800;color:var(--orange)">${bet.appetite}</div>
+            ${bet.tim_needed ? '<div style="font-size:10px;color:var(--yellow);font-weight:600;margin-top:2px">Needs Tim</div>' : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;align-items:center">
+          <div style="flex:1">${hillSVG(betScopes, true)}</div>
+          <div style="min-width:140px">
+            <div style="font-size:11px;color:var(--dim);margin-bottom:4px">Task Progress</div>
+            <div style="background:var(--bg);border-radius:4px;height:8px;overflow:hidden;margin-bottom:6px">
+              <div style="height:100%;width:${pctDone}%;background:var(--green);border-radius:4px"></div>
+            </div>
+            <div style="font-size:12px;display:flex;gap:10px">
+              <span style="color:var(--green);font-weight:700">${doneTasks} done</span>
+              <span style="color:var(--blue)">${inProgressTasks} active</span>
+              ${blockedTasks > 0 ? `<span style="color:var(--red)">${blockedTasks} blocked</span>` : ''}
+              <span style="color:var(--dim)">${totalTasks} total</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          ${betScopes.map((s, i) => {
+            const sc = s.status === 'done' ? '#22c55e' : SCOPE_COLORS[i % SCOPE_COLORS.length];
+            const st = state.tasks.filter(t => t.scope_id === s.id);
+            const sd = st.filter(t => t.status === 'done').length;
+            return `<div style="background:var(--bg);border-radius:6px;padding:6px 10px;font-size:11px;display:flex;align-items:center;gap:6px;border-left:3px solid ${sc}">
+              <span style="font-weight:600">${s.name}</span>
+              <span style="color:var(--dim)">${sd}/${st.length}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
   }
 
   el.innerHTML = html;
