@@ -465,11 +465,34 @@ async function setTaskStatus(taskId, newStatus) {
   showSaved();
 }
 
-async function updateTaskNotes(taskId, notes) {
-  await sb.from('flowspex_tasks').update({ notes, updated_at: new Date().toISOString() }).eq('id', taskId);
+// Debounced notes save — updates state immediately, writes to DB after 800ms pause
+const _notesTimers = {};
+let _activeNotesTaskId = null;
+
+function onNotesInput(taskId, value) {
+  _activeNotesTaskId = taskId;
   const task = state.tasks.find(t => t.id === taskId);
-  if (task) task.notes = notes;
+  if (task) task.notes = value;
+  if (_notesTimers[taskId]) clearTimeout(_notesTimers[taskId]);
+  _notesTimers[taskId] = setTimeout(() => flushNotes(taskId, value), 800);
+}
+
+async function flushNotes(taskId, notes) {
+  await sb.from('flowspex_tasks').update({ notes, updated_at: new Date().toISOString() }).eq('id', taskId);
   showSaved();
+}
+
+function onNotesBlur(taskId, value) {
+  if (_notesTimers[taskId]) { clearTimeout(_notesTimers[taskId]); _notesTimers[taskId] = null; }
+  const task = state.tasks.find(t => t.id === taskId);
+  if (task) task.notes = value;
+  flushNotes(taskId, value);
+  _activeNotesTaskId = null;
+}
+
+// Legacy wrapper for compatibility
+async function updateTaskNotes(taskId, notes) {
+  onNotesBlur(taskId, notes);
 }
 
 async function addTask(scopeId) {
@@ -578,6 +601,14 @@ function setView(v) {
 }
 
 function render() {
+    // Preserve active notes textarea during re-render
+    let _savedNotesCursor = null;
+    if (_activeNotesTaskId) {
+      const el = document.getElementById('notes-' + _activeNotesTaskId);
+      if (el && document.activeElement === el) {
+        _savedNotesCursor = { id: _activeNotesTaskId, start: el.selectionStart, end: el.selectionEnd, value: el.value, scrollTop: el.scrollTop };
+      }
+    }
   // Tabs
   const tabsEl = document.getElementById('tabs');
   tabsEl.innerHTML = ['overview','timeline','bets','plugins','activity','docs'].map(v => {
@@ -766,9 +797,11 @@ function renderBets(el) {
                   ${t.status==='blocked'?'Unblock':'Block'}
                 </button>
               </div>
-              ${t.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;padding:4px 8px;background:var(--surface);border-radius:4px">${t.notes}</div>` : ''}
-              <textarea class="task-notes-input" placeholder="Add notes..." rows="1"
-                onfocus="this.rows=2" onblur="this.rows=1;updateTaskNotes(${t.id},this.value)">${t.notes||''}</textarea>
+              ${t.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;padding:4px 8px;background:var(--surface);border-radius:4px;white-space:pre-wrap">${t.notes}</div>` : ''}
+              <textarea class="task-notes-input" id="notes-${t.id}" placeholder="Add notes..." rows="1"
+                onfocus="this.rows=3;_activeNotesTaskId=${t.id}"
+                oninput="onNotesInput(${t.id},this.value)"
+                onblur="this.rows=1;onNotesBlur(${t.id},this.value)">${t.notes||''}</textarea>
             </div>
           </div>`;
         });
